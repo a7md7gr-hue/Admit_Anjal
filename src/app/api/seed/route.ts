@@ -77,33 +77,33 @@ export async function GET(request: Request) {
     // Create Grades
     console.log('🎓 Creating grades...');
     const grades = await Grade.insertMany([
-      { nameAr: 'الصف الأول الابتدائي', nameEn: 'Grade 1', level: 1, stage: 'elementary' },
-      { nameAr: 'الصف الثاني الابتدائي', nameEn: 'Grade 2', level: 2, stage: 'elementary' },
-      { nameAr: 'الصف الثالث الابتدائي', nameEn: 'Grade 3', level: 3, stage: 'elementary' },
-      { nameAr: 'الصف الرابع الابتدائي', nameEn: 'Grade 4', level: 4, stage: 'elementary' },
-      { nameAr: 'الصف الخامس الابتدائي', nameEn: 'Grade 5', level: 5, stage: 'elementary' },
-      { nameAr: 'الصف السادس الابتدائي', nameEn: 'Grade 6', level: 6, stage: 'elementary' },
+      { code: 'G1', name: 'الصف الأول الابتدائي' },
+      { code: 'G2', name: 'الصف الثاني الابتدائي' },
+      { code: 'G3', name: 'الصف الثالث الابتدائي' },
+      { code: 'G4', name: 'الصف الرابع الابتدائي' },
+      { code: 'G5', name: 'الصف الخامس الابتدائي' },
+      { code: 'G6', name: 'الصف السادس الابتدائي' },
     ]);
     console.log(`✅ Created ${grades.length} grades`);
 
     // Create Subjects
     console.log('📖 Creating subjects...');
     const subjects = await Subject.insertMany([
-      { nameAr: 'رياضيات', nameEn: 'Mathematics', code: 'math' },
-      { nameAr: 'لغة عربية', nameEn: 'Arabic Language', code: 'arabic' },
-      { nameAr: 'لغة إنجليزية', nameEn: 'English Language', code: 'english' },
-      { nameAr: 'علوم', nameEn: 'Science', code: 'science' },
-      { nameAr: 'دراسات اجتماعية', nameEn: 'Social Studies', code: 'social' },
+      { code: 'MATH', name: 'رياضيات' },
+      { code: 'ARABIC', name: 'لغة عربية' },
+      { code: 'ENGLISH', name: 'لغة إنجليزية' },
+      { code: 'SCIENCE', name: 'علوم' },
+      { code: 'SOCIAL', name: 'دراسات اجتماعية' },
     ]);
     console.log(`✅ Created ${subjects.length} subjects`);
 
     // Create Question Categories
     console.log('🏷️  Creating question categories...');
     const categories = await QuestionCategory.insertMany([
-      { nameAr: 'سهل', nameEn: 'Easy', difficulty: 'easy' },
-      { nameAr: 'متوسط', nameEn: 'Medium', difficulty: 'medium' },
-      { nameAr: 'صعب', nameEn: 'Hard', difficulty: 'hard' },
-      { nameAr: 'تحدي', nameEn: 'Challenge', difficulty: 'hard' },
+      { code: 'EASY', name: 'سهل' },
+      { code: 'MEDIUM', name: 'متوسط' },
+      { code: 'HARD', name: 'صعب' },
+      { code: 'CHALLENGE', name: 'تحدي' },
     ]);
     console.log(`✅ Created ${categories.length} categories`);
 
@@ -182,7 +182,7 @@ export async function GET(request: Request) {
     console.log('👨‍🎓 Creating students...');
     const students = [];
     const arabicProgram = programs.find(p => p.code === 'ARABIC');
-    const sixthGrade = grades.find(g => g.level === 6);
+    const sixthGrade = grades.find(g => g.code === 'G6');
 
     for (let i = 0; i < 15; i++) {
       const student = await User.create({
@@ -214,8 +214,8 @@ export async function GET(request: Request) {
 
     // Create Questions
     console.log('❓ Creating questions...');
-    const mathSubject = subjects.find(s => s.code === 'math');
-    const easyCategory = categories.find(c => c.difficulty === 'easy');
+    const mathSubject = subjects.find(s => s.code === 'MATH');
+    const easyCategory = categories.find(c => c.code === 'EASY');
 
     const questions = [];
     for (let i = 0; i < 30; i++) {
@@ -250,7 +250,7 @@ export async function GET(request: Request) {
         nameAr: 'اختبار الصف السادس - لغة عربية',
         nameEn: 'Grade 6 - Arabic',
         gradeId: sixthGrade!._id,
-        subjectId: subjects.find(s => s.code === 'arabic')!._id,
+        subjectId: subjects.find(s => s.code === 'ARABIC')!._id,
         programId: arabicProgram!._id,
         totalMarks: 50,
         passingMarks: 30,
@@ -261,7 +261,7 @@ export async function GET(request: Request) {
         nameAr: 'اختبار الصف السادس - لغة إنجليزية',
         nameEn: 'Grade 6 - English',
         gradeId: sixthGrade!._id,
-        subjectId: subjects.find(s => s.code === 'english')!._id,
+        subjectId: subjects.find(s => s.code === 'ENGLISH')!._id,
         programId: arabicProgram!._id,
         totalMarks: 40,
         passingMarks: 24,
