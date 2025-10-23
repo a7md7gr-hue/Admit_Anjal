@@ -160,7 +160,7 @@ export default function StudentResults() {
                         gradeColor = "text-red-600 bg-red-50";
                       }
 
-                      return (
+  return (
                         <tr
                           key={i}
                           className="hover:bg-gray-50 transition-colors"
@@ -181,7 +181,7 @@ export default function StudentResults() {
                                 <span className="text-xs text-gray-500">
                                   ({r.pending_count} سؤال معلق)
                                 </span>
-                              </div>
+      </div>
                             )}
                           </td>
                           <td className="px-6 py-4 text-center text-gray-800 font-semibold">
@@ -214,7 +214,7 @@ export default function StudentResults() {
                       );
                     })}
                   </tbody>
-                </table>
+        </table>
               </div>
 
               {/* Summary */}
@@ -272,7 +272,7 @@ export default function StudentResults() {
             الأهلية والدولية
           </p>
           <p className="text-xs text-gray-500">
-            قسم تقنية المعلومات - إشراف: أستاذ هشام يسري
+            قسم الحاسب الآلي - إشراف: أستاذ هشام يسري
           </p>
         </div>
       </footer>
