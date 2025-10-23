@@ -69,8 +69,8 @@ export async function GET(request: Request) {
     // Create Programs
     console.log('📚 Creating programs...');
     const programs = await Program.insertMany([
-      { nameAr: 'عربي', nameEn: 'Arabic Program', code: 'arabic' },
-      { nameAr: 'دولي', nameEn: 'International Program', code: 'international' },
+      { code: 'ARABIC', name: 'البرنامج العربي' },
+      { code: 'INTERNATIONAL', name: 'البرنامج الدولي' },
     ]);
     console.log(`✅ Created ${programs.length} programs`);
 
@@ -181,7 +181,7 @@ export async function GET(request: Request) {
     // Create Students
     console.log('👨‍🎓 Creating students...');
     const students = [];
-    const arabicProgram = programs.find(p => p.code === 'arabic');
+    const arabicProgram = programs.find(p => p.code === 'ARABIC');
     const sixthGrade = grades.find(g => g.level === 6);
 
     for (let i = 0; i < 15; i++) {
