@@ -57,12 +57,12 @@ export async function GET(request: Request) {
     // Create Schools
     console.log('🏫 Creating schools...');
     const schools = await School.insertMany([
-      { nameAr: 'مدارس الأنجال الأهلية - بنين', nameEn: 'Al-Anjal National School - Boys', gender: 'male', programType: 'national' },
-      { nameAr: 'مدارس الأنجال الأهلية - بنات', nameEn: 'Al-Anjal National School - Girls', gender: 'female', programType: 'national' },
-      { nameAr: 'مدارس الأنجال الدولية - بنين', nameEn: 'Al-Anjal International School - Boys', gender: 'male', programType: 'international' },
-      { nameAr: 'مدارس الأنجال الدولية - بنات', nameEn: 'Al-Anjal International School - Girls', gender: 'female', programType: 'international' },
-      { nameAr: 'مدارس الأنجال - مدينة الملك عبدالله', nameEn: 'Al-Anjal School - King Abdullah City', gender: 'mixed', programType: 'mixed' },
-      { nameAr: 'مدارس الأنجال - مدينة الرياض', nameEn: 'Al-Anjal School - Riyadh City', gender: 'mixed', programType: 'mixed' },
+      { shortCode: 'ANB', name: 'مدارس الأنجال الأهلية - بنين' },
+      { shortCode: 'ANG', name: 'مدارس الأنجال الأهلية - بنات' },
+      { shortCode: 'AIB', name: 'مدارس الأنجال الدولية - بنين' },
+      { shortCode: 'AIG', name: 'مدارس الأنجال الدولية - بنات' },
+      { shortCode: 'AKAC', name: 'مدارس الأنجال - مدينة الملك عبدالله' },
+      { shortCode: 'ARC', name: 'مدارس الأنجال - مدينة الرياض' },
     ]);
     console.log(`✅ Created ${schools.length} schools`);
 
