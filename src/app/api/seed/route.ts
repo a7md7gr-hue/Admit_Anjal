@@ -16,7 +16,7 @@ import Exam from '@/models/Exam';
 import ExamBlueprint from '@/models/ExamBlueprint';
 import TeacherAssignment from '@/models/TeacherAssignment';
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
     console.log('🌱 Starting database seeding via API...');
 
