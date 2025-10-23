@@ -1,0 +1,40 @@
+{
+  "name": "admission-tests",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "biome check",
+    "format": "biome format --write",
+    "seed": "npx tsx scripts/seed-full.ts",
+    "seed:full": "npx tsx scripts/seed-full.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1",
+    "@supabase/auth-helpers-nextjs": "^0.10.0",
+    "@supabase/supabase-js": "^2.75.1",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.3",
+    "jose": "^6.1.0",
+    "mongoose": "^8.19.2",
+    "next": "15.5.6",
+    "prisma": "^6.17.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/xlsx": "^0.0.35",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5"
+  }
+}
