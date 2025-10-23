@@ -233,7 +233,7 @@ async function seed() {
         programId: arabicProgram!._id,
         gradeId: grades[2]._id, // G3
         categoryId: comprehensionCat!._id,
-        questionType: "MCQ",
+        questionType: "mcq",
         questionText: `سؤال لغة عربية رقم ${i}: ما معنى كلمة "التعاون"؟`,
       });
 
@@ -262,7 +262,7 @@ async function seed() {
         programId: arabicProgram!._id,
         gradeId: grades[2]._id,
         categoryId: applicationCat!._id,
-        questionType: "MCQ",
+        questionType: "mcq",
         questionText: `سؤال رياضيات رقم ${i}: كم ناتج ${i} + ${i}؟`,
       });
 
@@ -291,7 +291,7 @@ async function seed() {
         programId: arabicProgram!._id,
         gradeId: grades[2]._id,
         categoryId: comprehensionCat!._id,
-        questionType: "MCQ",
+        questionType: "mcq",
         questionText: `سؤال علوم رقم ${i}: ما هو مصدر الضوء الرئيسي للأرض؟`,
       });
 
@@ -424,6 +424,8 @@ async function seed() {
         programId: arabicProgram!._id,
         gradeId: grades[2]._id,
         pin4,
+        phone1: `+96650${1000000 + i}`,
+        phone2: `+96655${1000000 + i}`,
       });
 
       await Application.create({
