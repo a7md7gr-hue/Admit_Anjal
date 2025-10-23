@@ -52,3 +52,5 @@ backups/
 # Logs
 logs
 *.log
+
+.vercel
