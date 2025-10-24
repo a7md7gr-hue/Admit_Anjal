@@ -82,7 +82,6 @@ export default function UploadQuestionsPage() {
         "المادة (AR/MATH/SCI/EN)": "AR",
         "البرنامج (ARABIC/INTERNATIONAL)": "ARABIC",
         "الصف (G3-G12)": "G3",
-        "التصنيف (MCQ/ESSAY/ORAL)": "MCQ",
         النقاط: "2",
         "خيار 1": "الرياض",
         "صحيح 1 (TRUE/FALSE)": "TRUE",
@@ -99,7 +98,6 @@ export default function UploadQuestionsPage() {
         "المادة (AR/MATH/SCI/EN)": "AR",
         "البرنامج (ARABIC/INTERNATIONAL)": "ARABIC",
         "الصف (G3-G12)": "G3",
-        "التصنيف (MCQ/ESSAY/ORAL)": "ESSAY",
         النقاط: "10",
         "خيار 1": "",
         "صحيح 1 (TRUE/FALSE)": "",
@@ -123,7 +121,6 @@ export default function UploadQuestionsPage() {
       { wch: 25 }, // Subject
       { wch: 30 }, // Program
       { wch: 15 }, // Grade
-      { wch: 25 }, // Category
       { wch: 10 }, // Points
       { wch: 30 }, // Option 1
       { wch: 20 }, // Correct 1
@@ -309,17 +306,13 @@ export default function UploadQuestionsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-purple-600 font-bold">6.</span>
-                <span>التصنيف: MCQ أو ESSAY أو ORAL أو TRUE_FALSE</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-purple-600 font-bold">7.</span>
                 <span>
                   للأسئلة الاختيارية: املأ الخيارات (1-4) وحدد الإجابة الصحيحة
                   بـ TRUE
                 </span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-purple-600 font-bold">8.</span>
+                <span className="text-purple-600 font-bold">7.</span>
                 <span>للأسئلة المقالية/الشفوية: اترك خانات الخيارات فارغة</span>
               </li>
             </ul>

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
+import { getAuthUser } from '@/lib/auth';
 import Role from '@/models/Role';
 import User from '@/models/User';
 import StudentProfile from '@/models/StudentProfile';
@@ -13,12 +14,29 @@ import QuestionOption from '@/models/QuestionOption';
 import Exam from '@/models/Exam';
 import Attempt from '@/models/Attempt';
 import AttemptAnswer from '@/models/AttemptAnswer';
+import TeacherAssignment from '@/models/TeacherAssignment';
+import ManagerAssignment from '@/models/ManagerAssignment';
+import SupervisorAssignment from '@/models/SupervisorAssignment';
+import SubjectWeight from '@/models/SubjectWeight';
 
+/**
+ * مسح كامل لقاعدة البيانات (للـ Owner فقط!)
+ * يمسح كل شيء ماعدا Owner و Super Admin
+ */
 export async function POST() {
   try {
+    const authUser = await getAuthUser();
+    
+    // Only Owner can clear EVERYTHING
+    if (!authUser || authUser.role.toUpperCase() !== 'OWNER') {
+      return NextResponse.json({ 
+        error: 'غير مصرح لك! هذا الإجراء للـ Owner فقط.' 
+      }, { status: 403 });
+    }
+
     await connectDB();
 
-    console.log('🗑️ Starting database cleanup (keeping Owner & Super Admin)...');
+    console.log('🗑️ Starting FULL database cleanup (Owner only)...');
 
     // Get Owner and Super Admin role IDs BEFORE deleting anything
     const ownerRole = await Role.findOne({ code: 'OWNER' });
@@ -48,6 +66,18 @@ export async function POST() {
     await Question.deleteMany({});
     console.log('✅ Deleted Questions');
 
+    await TeacherAssignment.deleteMany({});
+    console.log('✅ Deleted TeacherAssignments');
+
+    await ManagerAssignment.deleteMany({});
+    console.log('✅ Deleted ManagerAssignments');
+
+    await SupervisorAssignment.deleteMany({});
+    console.log('✅ Deleted SupervisorAssignments');
+
+    await SubjectWeight.deleteMany({});
+    console.log('✅ Deleted SubjectWeights');
+
     await QuestionCategory.deleteMany({});
     console.log('✅ Deleted QuestionCategories');
 
@@ -73,7 +103,7 @@ export async function POST() {
     // Don't delete any roles - keep all roles intact
     console.log('🛡️ Kept all Roles intact');
 
-    console.log('🎉 Database cleared successfully!');
+    console.log('🎉 Database FULLY cleared successfully!');
 
     return NextResponse.json({
       success: true,
