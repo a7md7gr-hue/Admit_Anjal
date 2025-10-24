@@ -12,11 +12,12 @@ const PUBLIC_PATHS = ["/", "/auth/student", "/auth/staff", "/change-password"];
 
 // Role-based path access (uppercase codes)
 const ROLE_PATHS: Record<string, string[]> = {
-  OWNER: ["/super-admin", "/admin", "/manager", "/teacher", "/student"],
-  SUPER_ADMIN: ["/super-admin", "/admin", "/manager", "/teacher"],
-  MANAGER: ["/manager", "/admin"],
-  TEACHER: ["/teacher"],
-  STUDENT: ["/student"],
+  OWNER: ["/super-admin", "/admin", "/manager", "/teacher", "/student", "/profile"],
+  SUPER_ADMIN: ["/super-admin", "/admin", "/manager", "/teacher", "/profile"],
+  MANAGER: ["/manager", "/admin", "/profile"],
+  TEACHER: ["/teacher", "/profile"],
+  STUDENT: ["/student", "/profile"],
+  SUPERVISOR: ["/supervisor", "/profile"],
 };
 
 export async function middleware(request: NextRequest) {
@@ -45,6 +46,8 @@ export async function middleware(request: NextRequest) {
     "/teacher",
     "/student",
     "/admin",
+    "/profile",
+    "/supervisor",
   ];
   const isProtectedPath = protectedPaths.some((path) =>
     pathname.startsWith(path),
