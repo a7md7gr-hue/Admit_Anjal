@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 // Import all models
 import Role from '@/models/Role';
@@ -120,9 +121,10 @@ export async function GET(request: Request) {
 
     // Create Super Admin
     console.log('👨‍💼 Creating super admin...');
+    const hashedPassword = await bcrypt.hash('Test@1234', 10);
     const superAdmin = await User.create({
       nationalId: '1111111111',
-      password: 'Test@1234',
+      password: hashedPassword,
       fullName: 'مدير النظام',
       email: 'admin@anjal.edu.sa',
       phone: '+966511111111',
@@ -134,10 +136,11 @@ export async function GET(request: Request) {
     // Create Managers
     console.log('👔 Creating managers...');
     const managers = [];
+    const hashedManagerPassword = await bcrypt.hash('Test@1234', 10);
     for (let i = 0; i < 6; i++) {
       const manager = await User.create({
         nationalId: `222222${String(i).padStart(4, '0')}`,
-        password: 'Test@1234',
+        password: hashedManagerPassword,
         fullName: `مدير ${i + 1}`,
         email: `manager${i}@anjal.edu.sa`,
         phone: `+96652222000${i}`,
@@ -151,10 +154,11 @@ export async function GET(request: Request) {
     // Create Teachers
     console.log('👨‍🏫 Creating teachers...');
     const teachers = [];
+    const hashedTeacherPassword = await bcrypt.hash('Test@1234', 10);
     for (let i = 0; i < 10; i++) {
       const teacher = await User.create({
         nationalId: `444444${String(i).padStart(4, '0')}`,
-        password: 'Test@1234',
+        password: hashedTeacherPassword,
         fullName: `معلم ${i + 1}`,
         email: `teacher${i}@anjal.edu.sa`,
         phone: `+96654444000${i}`,
@@ -172,9 +176,11 @@ export async function GET(request: Request) {
     const sixthGrade = grades.find(g => g.code === 'G6');
 
     for (let i = 0; i < 15; i++) {
+      const pin = `${1000 + i}`;
+      const hashedStudentPassword = await bcrypt.hash(pin, 10);
       const student = await User.create({
         nationalId: `555555${String(i).padStart(4, '0')}`,
-        password: `${1000 + i}`,
+        password: hashedStudentPassword,
         fullName: `طالب ${i + 1}`,
         email: `student${i}@anjal.edu.sa`,
         phone: `+96655555000${i}`,
