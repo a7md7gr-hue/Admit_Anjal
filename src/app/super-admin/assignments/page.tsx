@@ -40,9 +40,9 @@ export default function AssignmentsPage() {
         const usersData = await usersRes.json();
         const refsData = await refsRes.json();
 
-        setTeachers(usersData.users?.filter((u: any) => u.role?.code === 'TEACHER') || []);
-        setManagers(usersData.users?.filter((u: any) => u.role?.code === 'MANAGER') || []);
-        setSupervisors(usersData.users?.filter((u: any) => u.role?.code === 'SUPERVISOR') || []);
+        setTeachers(usersData.users?.filter((u: any) => u.roleCode === 'TEACHER') || []);
+        setManagers(usersData.users?.filter((u: any) => u.roleCode === 'MANAGER') || []);
+        setSupervisors(usersData.users?.filter((u: any) => u.roleCode === 'SUPERVISOR') || []);
         
         setSubjects(refsData.subjects || []);
         setGrades(refsData.grades || []);

@@ -16,6 +16,7 @@ import Question from '@/models/Question';
 import Exam from '@/models/Exam';
 import ExamBlueprint from '@/models/ExamBlueprint';
 import TeacherAssignment from '@/models/TeacherAssignment';
+import PasswordReset from '@/models/PasswordReset';
 
 export async function GET(request: Request) {
   try {
@@ -40,6 +41,7 @@ export async function GET(request: Request) {
       Exam.deleteMany({}),
       ExamBlueprint.deleteMany({}),
       TeacherAssignment.deleteMany({}),
+      PasswordReset.deleteMany({}),
     ]);
     console.log('✅ Data cleared');
 
@@ -161,6 +163,12 @@ export async function GET(request: Request) {
         isActive: true,
       });
       managers.push(manager);
+      
+      // Set mustChangePassword for first login
+      await PasswordReset.create({
+        userId: manager._id,
+        mustChangePassword: true,
+      });
     }
     console.log(`✅ Created ${managers.length} managers`);
 
@@ -189,6 +197,12 @@ export async function GET(request: Request) {
         isActive: true,
       });
       teachers.push(teacher);
+      
+      // Set mustChangePassword for first login
+      await PasswordReset.create({
+        userId: teacher._id,
+        mustChangePassword: true,
+      });
     }
     console.log(`✅ Created ${teachers.length} teachers`);
 
