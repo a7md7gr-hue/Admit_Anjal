@@ -1535,8 +1535,7 @@ export default function SuperAdminDashboard() {
                     لإعادة ملء قاعدة البيانات
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       </main>
