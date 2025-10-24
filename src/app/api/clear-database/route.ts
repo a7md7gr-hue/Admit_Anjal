@@ -9,8 +9,10 @@ import Grade from '@/models/Grade';
 import Subject from '@/models/Subject';
 import QuestionCategory from '@/models/QuestionCategory';
 import Question from '@/models/Question';
+import QuestionOption from '@/models/QuestionOption';
 import Exam from '@/models/Exam';
-import StudentExam from '@/models/StudentExam';
+import Attempt from '@/models/Attempt';
+import AttemptAnswer from '@/models/AttemptAnswer';
 
 export async function POST() {
   try {
@@ -19,11 +21,17 @@ export async function POST() {
     console.log('🗑️ Starting database cleanup...');
 
     // Delete in correct order (respect foreign keys)
-    await StudentExam.deleteMany({});
-    console.log('✅ Deleted StudentExams');
+    await AttemptAnswer.deleteMany({});
+    console.log('✅ Deleted AttemptAnswers');
+
+    await Attempt.deleteMany({});
+    console.log('✅ Deleted Attempts');
 
     await Exam.deleteMany({});
     console.log('✅ Deleted Exams');
+
+    await QuestionOption.deleteMany({});
+    console.log('✅ Deleted QuestionOptions');
 
     await Question.deleteMany({});
     console.log('✅ Deleted Questions');
@@ -58,8 +66,10 @@ export async function POST() {
       success: true,
       message: 'تم مسح قاعدة البيانات بنجاح! يمكنك الآن البدء من الصفر.',
       deletedCollections: [
-        'StudentExams',
+        'AttemptAnswers',
+        'Attempts',
         'Exams',
+        'QuestionOptions',
         'Questions',
         'QuestionCategories',
         'Subjects',
