@@ -289,10 +289,221 @@ export default function AssignmentsPage() {
               </div>
             )}
 
-            {/* Other tabs - I'll add them next */}
-            {activeTab !== 'teachers' && (
-              <div className="text-center py-12 text-gray-500">
-                قريباً... 🚧
+            {/* Subject Weights Tab */}
+            {activeTab === 'weights' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900">تحديد أوزان المواد لكل صف</h2>
+                <p className="text-gray-600">يجب أن يكون مجموع أوزان المواد = 100% لكل صف</p>
+                
+                <div className="space-y-4">
+                  {grades.map(grade => (
+                    <div key={grade._id} className="bg-gray-50 p-4 rounded-xl">
+                      <h3 className="font-bold mb-3">{grade.name}</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {subjects.map(subject => {
+                          const weight = subjectWeights.find(
+                            (w: any) => w.gradeId?._id === grade._id && w.subjectId?._id === subject._id
+                          );
+                          
+                          return (
+                            <div key={subject._id} className="bg-white p-3 rounded border">
+                              <p className="text-sm font-semibold mb-1">{subject.name}</p>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                defaultValue={weight?.weight || 25}
+                                className="w-full border rounded px-2 py-1 text-sm"
+                                onBlur={async (e) => {
+                                  const newWeight = Number(e.target.value);
+                                  try {
+                                    await fetch('/api/super-admin/assignments/subject-weights', {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        gradeId: grade._id,
+                                        subjectId: subject._id,
+                                        weight: newWeight,
+                                      }),
+                                    });
+                                    loadAssignments();
+                                  } catch (error) {
+                                    console.error(error);
+                                  }
+                                }}
+                              />
+                              <p className="text-xs text-gray-500 mt-1">%</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Supervisors Tab */}
+            {activeTab === 'supervisors' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900">ربط مشرف بمعلمين</h2>
+                
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/super-admin/assignments/supervisors', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        supervisorId: formData.get('supervisorId'),
+                        teacherId: formData.get('teacherId'),
+                      }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setMessage('✅ ' + data.message);
+                      form.reset();
+                      loadAssignments();
+                    } else {
+                      setMessage('❌ ' + data.error);
+                    }
+                  } catch (error: any) {
+                    setMessage('❌ ' + error.message);
+                  } finally {
+                    setLoading(false);
+                  }
+                }} className="bg-gray-50 p-6 rounded-xl space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-semibold mb-2">المشرف</label>
+                      <select name="supervisorId" required className="w-full border rounded-lg px-4 py-2">
+                        <option value="">اختر المشرف</option>
+                        {supervisors.map(s => (
+                          <option key={s._id} value={s._id}>{s.fullName}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-2">المعلم</label>
+                      <select name="teacherId" required className="w-full border rounded-lg px-4 py-2">
+                        <option value="">اختر المعلم</option>
+                        {teachers.map(t => (
+                          <option key={t._id} value={t._id}>{t.fullName}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700">
+                    {loading ? 'جاري الحفظ...' : '✅ حفظ الربط'}
+                  </button>
+                </form>
+
+                <div className="space-y-2">
+                  {supervisorAssignments.map((assign: any) => (
+                    <div key={assign._id} className="flex items-center justify-between p-4 bg-white border rounded-lg">
+                      <div>
+                        <p className="font-semibold">👔 {assign.supervisorId?.fullName}</p>
+                        <p className="text-sm text-gray-600">يشرف على: {assign.teacherId?.fullName}</p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (!confirm('حذف؟')) return;
+                          await fetch(`/api/super-admin/assignments/supervisors?id=${assign._id}`, { method: 'DELETE' });
+                          loadAssignments();
+                        }}
+                        className="text-red-600 hover:bg-red-50 px-4 py-2 rounded"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Managers Tab */}
+            {activeTab === 'managers' && (
+              <div className="space-y-6">
+                <h2 className="text-xl font-bold text-gray-900">ربط مدير بمدرسة</h2>
+                
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const form = e.target as HTMLFormElement;
+                  const formData = new FormData(form);
+                  
+                  setLoading(true);
+                  try {
+                    const res = await fetch('/api/super-admin/assignments/managers', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        managerId: formData.get('managerId'),
+                        schoolId: formData.get('schoolId'),
+                      }),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      setMessage('✅ ' + data.message);
+                      form.reset();
+                      loadAssignments();
+                    } else {
+                      setMessage('❌ ' + data.error);
+                    }
+                  } catch (error: any) {
+                    setMessage('❌ ' + error.message);
+                  } finally {
+                    setLoading(false);
+                  }
+                }} className="bg-gray-50 p-6 rounded-xl space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block font-semibold mb-2">المدير</label>
+                      <select name="managerId" required className="w-full border rounded-lg px-4 py-2">
+                        <option value="">اختر المدير</option>
+                        {managers.map(m => (
+                          <option key={m._id} value={m._id}>{m.fullName}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block font-semibold mb-2">المدرسة</label>
+                      <select name="schoolId" required className="w-full border rounded-lg px-4 py-2">
+                        <option value="">اختر المدرسة</option>
+                        {schools.map(s => (
+                          <option key={s._id} value={s._id}>{s.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <button type="submit" disabled={loading} className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700">
+                    {loading ? 'جاري الحفظ...' : '✅ حفظ الربط'}
+                  </button>
+                </form>
+
+                <div className="space-y-2">
+                  {managerAssignments.map((assign: any) => (
+                    <div key={assign._id} className="flex items-center justify-between p-4 bg-white border rounded-lg">
+                      <div>
+                        <p className="font-semibold">👥 {assign.managerId?.fullName}</p>
+                        <p className="text-sm text-gray-600">مدير: {assign.schoolId?.name}</p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (!confirm('حذف؟')) return;
+                          await fetch(`/api/super-admin/assignments/managers?id=${assign._id}`, { method: 'DELETE' });
+                          loadAssignments();
+                        }}
+                        className="text-red-600 hover:bg-red-50 px-4 py-2 rounded"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
