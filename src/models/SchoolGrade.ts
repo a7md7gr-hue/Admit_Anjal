@@ -34,3 +34,4 @@ export default mongoose.models.SchoolGrade ||
   mongoose.model<ISchoolGrade>("SchoolGrade", SchoolGradeSchema);
 
 
+

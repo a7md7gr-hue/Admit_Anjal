@@ -9,11 +9,8 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [userName, setUserName] = useState("");
-  const [userRole, setUserRole] = useState("");
   const [clearing, setClearing] = useState(false);
-  const [emptying, setEmptying] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
-  const [emptyConfirm, setEmptyConfirm] = useState(false);
   const router = useRouter();
 
   // Form states
@@ -65,44 +62,6 @@ export default function SuperAdminDashboard() {
     }
   }, [activeTab]);
 
-  // تفريغ قاعدة البيانات (Super Admin) - يحذف الأسئلة والطلاب والمعلمين فقط
-  async function handleEmptyDatabase() {
-    if (!emptyConfirm) {
-      setEmptyConfirm(true);
-      setTimeout(() => setEmptyConfirm(false), 5000);
-      return;
-    }
-
-    if (!confirm("⚠️ سيتم حذف:\n- الأسئلة\n- الطلاب\n- المعلمين\n- المديرين\n- المشرفين\n- الامتحانات\n\nسيتم الاحتفاظ بـ:\n- المدارس\n- البرامج\n- الصفوف\n- المواد\n\nهل تريد المتابعة؟")) {
-      setEmptyConfirm(false);
-      return;
-    }
-
-    setEmptying(true);
-    setMessage("");
-
-    try {
-      const response = await fetch('/api/empty-database', {
-        method: 'POST',
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        setMessage("✅ تم تفريغ قاعدة البيانات بنجاح!");
-        alert(data.message);
-        loadStats();
-      } else {
-        setMessage("❌ خطأ: " + data.error);
-      }
-    } catch (err: any) {
-      setMessage("❌ خطأ: " + err.message);
-    } finally {
-      setEmptying(false);
-      setEmptyConfirm(false);
-    }
-  }
-
-  // مسح كامل (Owner فقط) - يحذف كل شيء بما فيه المدارس والصفوف والمواد
   async function handleClearDatabase() {
     if (!clearConfirm) {
       setClearConfirm(true);
@@ -110,7 +69,7 @@ export default function SuperAdminDashboard() {
       return;
     }
 
-    if (!confirm("⚠️⚠️ تحذير خطير: سيتم مسح جميع البيانات بالكامل!\n\n- المدارس\n- البرامج\n- الصفوف\n- المواد\n- الطلاب\n- المعلمين\n- الأسئلة\n- كل شيء!\n\nهل أنت متأكد 100%؟")) {
+    if (!confirm("⚠️ تحذير نهائي: سيتم مسح جميع البيانات نهائياً!\n\nهل أنت متأكد 100%؟")) {
       setClearConfirm(false);
       return;
     }
@@ -125,14 +84,13 @@ export default function SuperAdminDashboard() {
       const data = await response.json();
 
       if (data.success) {
-        setMessage("✅ تم مسح قاعدة البيانات بالكامل!");
+        setMessage("✅ تم مسح قاعدة البيانات بنجاح!");
         alert(data.message + "\n\nسيتم إعادة تحميل الصفحة...");
         setTimeout(() => {
           router.push("/");
         }, 2000);
       } else {
         setMessage("❌ خطأ: " + data.error);
-        alert("خطأ: " + data.error);
       }
     } catch (err: any) {
       setMessage("❌ خطأ: " + err.message);
@@ -148,7 +106,6 @@ export default function SuperAdminDashboard() {
       if (res.ok) {
         const data = await res.json();
         setUserName(data.fullName || "");
-        setUserRole(data.role || "");
       }
     } catch (error) {
       console.error("Error fetching user name:", error);
@@ -1386,107 +1343,48 @@ export default function SuperAdminDashboard() {
                   🗄️ إدارة قاعدة البيانات
                 </h2>
 
-                {/* Empty Database - للـ Super Admin */}
-                <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-2xl p-8 mb-6">
+                <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="text-6xl">🗑️</div>
+                    <div className="text-6xl">⚠️</div>
                     <div>
-                      <h3 className="text-2xl font-bold text-orange-700 mb-2">
-                        تفريغ قاعدة البيانات
+                      <h3 className="text-2xl font-bold text-red-700 mb-2">
+                        منطقة خطرة!
                       </h3>
-                      <p className="text-orange-600">
-                        حذف البيانات المتغيرة (الطلاب، المعلمين، الأسئلة)
+                      <p className="text-red-600">
+                        هذا الإجراء سيحذف جميع البيانات من قاعدة البيانات نهائياً
                       </p>
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-white rounded-xl p-4">
-                      <h4 className="font-bold text-red-700 mb-2">
-                        ✗ سيتم حذف:
-                      </h4>
-                      <ul className="text-gray-700 space-y-1 text-sm">
-                        <li>• الطلاب</li>
-                        <li>• المعلمين</li>
-                        <li>• المديرين</li>
-                        <li>• المشرفين</li>
-                        <li>• الأسئلة</li>
-                        <li>• الامتحانات</li>
-                      </ul>
-                    </div>
-                    <div className="bg-white rounded-xl p-4">
-                      <h4 className="font-bold text-green-700 mb-2">
-                        ✓ سيتم الاحتفاظ بـ:
-                      </h4>
-                      <ul className="text-gray-700 space-y-1 text-sm">
-                        <li>• المدارس</li>
-                        <li>• البرامج</li>
-                        <li>• الصفوف</li>
-                        <li>• المواد</li>
-                        <li>• Owner & Super Admin</li>
-                      </ul>
-                    </div>
+                  <div className="bg-white rounded-xl p-6 mb-6">
+                    <h4 className="font-bold text-gray-800 mb-3">
+                      سيتم حذف:
+                    </h4>
+                    <ul className="grid grid-cols-2 gap-2 text-gray-700">
+                      <li>✓ جميع المستخدمين</li>
+                      <li>✓ جميع الطلاب</li>
+                      <li>✓ جميع الأسئلة</li>
+                      <li>✓ جميع الاختبارات</li>
+                      <li>✓ جميع المحاولات</li>
+                      <li>✓ جميع النتائج</li>
+                      <li>✓ جميع المواد</li>
+                      <li>✓ جميع البرامج</li>
+                      <li>✓ جميع الصفوف</li>
+                      <li>✓ جميع المدارس</li>
+                      <li>✓ جميع الأدوار</li>
+                      <li>✓ كل شيء!</li>
+                    </ul>
                   </div>
 
-                  <button
-                    onClick={handleEmptyDatabase}
-                    disabled={emptying}
-                    className={`w-full py-4 rounded-xl font-bold text-white text-lg transition-all shadow-lg ${
-                      emptyConfirm
-                        ? "bg-gradient-to-r from-orange-600 to-red-600 animate-pulse"
-                        : "bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700"
-                    } ${emptying ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    {emptying
-                      ? "⏳ جاري التفريغ..."
-                      : emptyConfirm
-                      ? "⚠️ اضغط مرة أخرى للتأكيد!"
-                      : "🗑️ تفريغ قاعدة البيانات"}
-                  </button>
-                </div>
-
-                {/* Clear Database - للـ Owner فقط */}
-                {userRole === 'OWNER' && (
-                  <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="text-6xl">⚠️</div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-red-700 mb-2">
-                          مسح كامل - منطقة خطرة!
-                        </h3>
-                        <p className="text-red-600">
-                          حذف جميع البيانات بما فيها المدارس والصفوف والمواد
-                        </p>
-                      </div>
+                  {message && (
+                    <div className={`p-4 rounded-lg mb-4 ${
+                      message.includes("✅") 
+                        ? "bg-green-100 text-green-700" 
+                        : "bg-red-100 text-red-700"
+                    }`}>
+                      {message}
                     </div>
-
-                    <div className="bg-white rounded-xl p-6 mb-6">
-                      <h4 className="font-bold text-red-800 mb-3">
-                        سيتم حذف كل شيء:
-                      </h4>
-                      <ul className="grid grid-cols-2 gap-2 text-gray-700">
-                        <li>✗ المستخدمين</li>
-                        <li>✗ الطلاب</li>
-                        <li>✗ الأسئلة</li>
-                        <li>✗ الاختبارات</li>
-                        <li>✗ المواد</li>
-                        <li>✗ البرامج</li>
-                        <li>✗ الصفوف</li>
-                        <li>✗ المدارس</li>
-                        <li>✗ الربط</li>
-                        <li>✗ كل شيء!</li>
-                      </ul>
-                    </div>
-
-                    {message && (
-                      <div className={`p-4 rounded-lg mb-4 ${
-                        message.includes("✅") 
-                          ? "bg-green-100 text-green-700" 
-                          : "bg-red-100 text-red-700"
-                      }`}>
-                        {message}
-                      </div>
-                    )}
+                  )}
 
                   <button
                     onClick={handleClearDatabase}
@@ -1535,7 +1433,8 @@ export default function SuperAdminDashboard() {
                     لإعادة ملء قاعدة البيانات
                   </div>
                 </div>
-              )}
+              </div>
+            )}
           </div>
         </div>
       </main>
