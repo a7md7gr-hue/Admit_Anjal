@@ -447,7 +447,7 @@ export default function ManagerDashboard() {
             الأهلية والدولية
           </p>
           <p className="text-xs text-gray-500">
-            قسم الحاسب الآلي - إشراف: أستاذ هشام يسري
+            قسم الحاسب الآلي
           </p>
         </div>
       </footer>

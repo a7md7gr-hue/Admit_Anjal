@@ -108,11 +108,12 @@ export default function SetupPage() {
         )}
 
         <div className="mt-8 pt-8 border-t border-white/20 text-center text-white/60 text-sm">
-          <p>💻 قسم الحاسب الآلي - إشراف: أستاذ هشام يسري</p>
+          <p>💻 قسم الحاسب الآلي</p>
           <p className="mt-2">🏫 مدارس الأنجال الأهلية والدولية</p>
         </div>
       </div>
     </div>
   );
 }
+
 

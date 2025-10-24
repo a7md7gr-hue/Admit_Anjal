@@ -8,7 +8,7 @@ const Footer = () => {
           © {new Date().getFullYear()} جميع الحقوق محفوظة - مدارس الأنجال
           الأهلية والدولية
         </p>
-        <p className="text-xs">قسم الحاسب الآلي - إشراف: أستاذ هشام يسري</p>
+        <p className="text-xs">قسم الحاسب الآلي</p>
       </div>
     </footer>
   );

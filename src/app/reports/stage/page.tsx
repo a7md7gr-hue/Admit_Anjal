@@ -104,3 +104,4 @@ export default function StageReportPage() {
     </div>
   );
 }
+
