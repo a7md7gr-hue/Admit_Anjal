@@ -425,7 +425,15 @@ export default function SuperAdminDashboard() {
                 </h2>
 
                 {/* Quick Actions */}
-                <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <button
+                    onClick={() => router.push("/super-admin/assignments")}
+                    className="bg-gradient-to-r from-green-600 to-emerald-700 text-white px-6 py-4 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-800 transition-all shadow-lg flex items-center justify-center gap-3"
+                  >
+                    <span className="text-2xl">🔗</span>
+                    <span>إدارة الربط</span>
+                  </button>
+
                   <button
                     onClick={() => router.push("/super-admin/upload-students")}
                     className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg flex items-center justify-center gap-3"
