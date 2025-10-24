@@ -4,8 +4,10 @@ import { useState } from 'react';
 
 export default function SetupPage() {
   const [loading, setLoading] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [clearConfirm, setClearConfirm] = useState(false);
 
   async function handleSeed() {
     setLoading(true);
@@ -28,6 +30,37 @@ export default function SetupPage() {
     }
   }
 
+  async function handleClearDatabase() {
+    if (!clearConfirm) {
+      setClearConfirm(true);
+      setTimeout(() => setClearConfirm(false), 5000);
+      return;
+    }
+
+    setClearing(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const response = await fetch('/api/clear-database', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        alert('✅ ' + data.message);
+        window.location.reload();
+      } else {
+        setError(data.error || 'فشل مسح قاعدة البيانات');
+      }
+    } catch (err: any) {
+      setError(err.message || 'حدث خطأ');
+    } finally {
+      setClearing(false);
+      setClearConfirm(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
       <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 max-w-2xl w-full border border-white/20">
@@ -39,23 +72,55 @@ export default function SetupPage() {
           اضغط على الزر أدناه لملء قاعدة البيانات بالبيانات الأولية
         </p>
 
-        <button
-          onClick={handleSeed}
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              جاري الملء...
-            </span>
-          ) : (
-            '🚀 ابدأ الإعداد'
+        <div className="space-y-4">
+          <button
+            onClick={handleSeed}
+            disabled={loading || clearing}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                جاري الملء...
+              </span>
+            ) : (
+              '🚀 ابدأ الإعداد'
+            )}
+          </button>
+
+          <button
+            onClick={handleClearDatabase}
+            disabled={loading || clearing}
+            className={`w-full font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+              clearConfirm
+                ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 animate-pulse'
+                : 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600'
+            } text-white`}
+          >
+            {clearing ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                جاري المسح...
+              </span>
+            ) : clearConfirm ? (
+              '⚠️ اضغط مرة ثانية للتأكيد - سيتم مسح كل شيء!'
+            ) : (
+              '🗑️ مسح قاعدة البيانات بالكامل'
+            )}
+          </button>
+
+          {clearConfirm && (
+            <p className="text-yellow-300 text-sm text-center animate-pulse">
+              ⚠️ تحذير: سيتم حذف جميع البيانات نهائياً! (5 ثواني)
+            </p>
           )}
-        </button>
+        </div>
 
         {error && (
           <div className="mt-6 bg-red-500/20 border border-red-500 rounded-lg p-4">

@@ -9,6 +9,8 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [userName, setUserName] = useState("");
+  const [clearing, setClearing] = useState(false);
+  const [clearConfirm, setClearConfirm] = useState(false);
   const router = useRouter();
 
   // Form states
@@ -59,6 +61,44 @@ export default function SuperAdminDashboard() {
       loadReports();
     }
   }, [activeTab]);
+
+  async function handleClearDatabase() {
+    if (!clearConfirm) {
+      setClearConfirm(true);
+      setTimeout(() => setClearConfirm(false), 5000);
+      return;
+    }
+
+    if (!confirm("⚠️ تحذير نهائي: سيتم مسح جميع البيانات نهائياً!\n\nهل أنت متأكد 100%؟")) {
+      setClearConfirm(false);
+      return;
+    }
+
+    setClearing(true);
+    setMessage("");
+
+    try {
+      const response = await fetch('/api/clear-database', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage("✅ تم مسح قاعدة البيانات بنجاح!");
+        alert(data.message + "\n\nسيتم إعادة تحميل الصفحة...");
+        setTimeout(() => {
+          router.push("/");
+        }, 2000);
+      } else {
+        setMessage("❌ خطأ: " + data.error);
+      }
+    } catch (err: any) {
+      setMessage("❌ خطأ: " + err.message);
+    } finally {
+      setClearing(false);
+      setClearConfirm(false);
+    }
+  }
 
   async function fetchUserName() {
     try {
@@ -360,6 +400,7 @@ export default function SuperAdminDashboard() {
               { id: "students", label: "👨‍🎓 الطلاب" },
               { id: "questions", label: "❓ بنك الأسئلة" },
               { id: "reports", label: "📈 التقارير" },
+              { id: "database", label: "🗄️ إدارة قاعدة البيانات" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1284,6 +1325,106 @@ export default function SuperAdminDashboard() {
                     جاري تحميل التقارير...
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Database Management Tab */}
+            {activeTab === "database" && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  🗄️ إدارة قاعدة البيانات
+                </h2>
+
+                <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="text-6xl">⚠️</div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-red-700 mb-2">
+                        منطقة خطرة!
+                      </h3>
+                      <p className="text-red-600">
+                        هذا الإجراء سيحذف جميع البيانات من قاعدة البيانات نهائياً
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-6 mb-6">
+                    <h4 className="font-bold text-gray-800 mb-3">
+                      سيتم حذف:
+                    </h4>
+                    <ul className="grid grid-cols-2 gap-2 text-gray-700">
+                      <li>✓ جميع المستخدمين</li>
+                      <li>✓ جميع الطلاب</li>
+                      <li>✓ جميع الأسئلة</li>
+                      <li>✓ جميع الاختبارات</li>
+                      <li>✓ جميع المحاولات</li>
+                      <li>✓ جميع النتائج</li>
+                      <li>✓ جميع المواد</li>
+                      <li>✓ جميع البرامج</li>
+                      <li>✓ جميع الصفوف</li>
+                      <li>✓ جميع المدارس</li>
+                      <li>✓ جميع الأدوار</li>
+                      <li>✓ كل شيء!</li>
+                    </ul>
+                  </div>
+
+                  {message && (
+                    <div className={`p-4 rounded-lg mb-4 ${
+                      message.includes("✅") 
+                        ? "bg-green-100 text-green-700" 
+                        : "bg-red-100 text-red-700"
+                    }`}>
+                      {message}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleClearDatabase}
+                    disabled={clearing}
+                    className={`w-full font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      clearConfirm
+                        ? 'bg-gradient-to-r from-red-700 to-red-900 hover:from-red-800 hover:to-red-950 animate-pulse text-white'
+                        : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white'
+                    }`}
+                  >
+                    {clearing ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        جاري مسح قاعدة البيانات...
+                      </span>
+                    ) : clearConfirm ? (
+                      <span className="text-lg">
+                        🚨 اضغط مرة ثانية للتأكيد النهائي - سيتم مسح كل شيء نهائياً!
+                      </span>
+                    ) : (
+                      <span className="text-lg">
+                        🗑️ مسح قاعدة البيانات بالكامل
+                      </span>
+                    )}
+                  </button>
+
+                  {clearConfirm && (
+                    <div className="mt-4 text-center">
+                      <p className="text-red-700 font-bold text-lg animate-pulse">
+                        ⏰ لديك 5 ثوانٍ للتأكيد!
+                      </p>
+                      <p className="text-red-600 text-sm mt-2">
+                        سيتم إلغاء التأكيد تلقائياً بعد 5 ثوانٍ
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="mt-6 text-center text-gray-600 text-sm">
+                    💡 بعد المسح، يمكنك الذهاب إلى{" "}
+                    <a href="/setup" className="text-blue-600 hover:underline font-semibold">
+                      /setup
+                    </a>{" "}
+                    لإعادة ملء قاعدة البيانات
+                  </div>
+                </div>
               </div>
             )}
           </div>
