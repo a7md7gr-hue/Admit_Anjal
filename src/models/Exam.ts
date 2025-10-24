@@ -6,7 +6,15 @@ export interface IExam extends Document {
   subjectId: Types.ObjectId;
   programId: Types.ObjectId;
   gradeId: Types.ObjectId;
+  schoolId: Types.ObjectId; // المدرسة
+  startDate: Date; // تاريخ بدء الامتحان
+  endDate: Date; // تاريخ انتهاء الامتحان
+  duration: number; // مدة الامتحان بالدقائق
+  totalMarks: number; // مجموع الدرجات
+  passingMarks: number; // درجة النجاح
+  instructions?: string; // تعليمات الامتحان
   isActive: boolean;
+  createdBy: Types.ObjectId; // من أنشأ الامتحان
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,9 +41,46 @@ const ExamSchema = new Schema<IExam>(
       ref: "Grade",
       required: true,
     },
+    schoolId: {
+      type: Schema.Types.ObjectId,
+      ref: "School",
+      required: true,
+    },
+    startDate: {
+      type: Date,
+      required: true,
+    },
+    endDate: {
+      type: Date,
+      required: true,
+    },
+    duration: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    totalMarks: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    passingMarks: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    instructions: {
+      type: String,
+      trim: true,
+    },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
   },
   {

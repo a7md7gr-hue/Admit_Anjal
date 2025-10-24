@@ -291,13 +291,25 @@ export async function GET(request: Request) {
     console.log(`✅ Created ${questions.length} questions`);
 
     // Create Exams
-    console.log('📝 Creating exams...');
+    console.log('📝 Creating sample exams...');
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    
     const exams = await Exam.insertMany([
       {
         name: 'اختبار الصف السادس - رياضيات',
         gradeId: sixthGrade!._id,
         subjectId: mathSubject!._id,
         programId: arabicProgram!._id,
+        schoolId: schools.find(s => s.shortCode === 'ANB')!._id,
+        startDate: tomorrow,
+        endDate: nextWeek,
+        duration: 60, // 60 minutes
+        totalMarks: 20, // Will be recalculated when questions are added
+        passingMarks: 12,
+        instructions: 'اقرأ الأسئلة بعناية قبل الإجابة. استخدم الوقت المتاح بحكمة.',
+        createdBy: superAdmin._id,
         isActive: true,
       },
       {
@@ -305,6 +317,14 @@ export async function GET(request: Request) {
         gradeId: sixthGrade!._id,
         subjectId: subjects.find(s => s.code === 'ARABIC')!._id,
         programId: arabicProgram!._id,
+        schoolId: schools.find(s => s.shortCode === 'ANB')!._id,
+        startDate: tomorrow,
+        endDate: nextWeek,
+        duration: 90,
+        totalMarks: 20,
+        passingMarks: 12,
+        instructions: 'اقرأ الأسئلة بعناية قبل الإجابة.',
+        createdBy: superAdmin._id,
         isActive: true,
       },
       {
@@ -312,10 +332,18 @@ export async function GET(request: Request) {
         gradeId: sixthGrade!._id,
         subjectId: subjects.find(s => s.code === 'ENGLISH')!._id,
         programId: arabicProgram!._id,
+        schoolId: schools.find(s => s.shortCode === 'ANB')!._id,
+        startDate: tomorrow,
+        endDate: nextWeek,
+        duration: 60,
+        totalMarks: 20,
+        passingMarks: 12,
+        instructions: 'Read all questions carefully before answering.',
+        createdBy: superAdmin._id,
         isActive: true,
       },
     ]);
-    console.log(`✅ Created ${exams.length} exams`);
+    console.log(`✅ Created ${exams.length} sample exams`);
 
     // Success response
     return NextResponse.json({
