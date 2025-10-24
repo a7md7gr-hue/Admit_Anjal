@@ -75,26 +75,29 @@ export async function GET(request: Request) {
     ]);
     console.log(`✅ Created ${programs.length} programs`);
 
-    // Create Grades
+    // Create Grades (من ثالث إلى ثاني ثانوي - 10 صفوف)
     console.log('🎓 Creating grades...');
     const grades = await Grade.insertMany([
-      { code: 'G1', name: 'الصف الأول الابتدائي' },
-      { code: 'G2', name: 'الصف الثاني الابتدائي' },
       { code: 'G3', name: 'الصف الثالث الابتدائي' },
       { code: 'G4', name: 'الصف الرابع الابتدائي' },
       { code: 'G5', name: 'الصف الخامس الابتدائي' },
       { code: 'G6', name: 'الصف السادس الابتدائي' },
+      { code: 'G7', name: 'الصف الأول المتوسط' },
+      { code: 'G8', name: 'الصف الثاني المتوسط' },
+      { code: 'G9', name: 'الصف الثالث المتوسط' },
+      { code: 'G10', name: 'الصف الأول الثانوي' },
+      { code: 'G11', name: 'الصف الثاني الثانوي' },
+      { code: 'G12', name: 'الصف الثالث الثانوي' },
     ]);
     console.log(`✅ Created ${grades.length} grades`);
 
-    // Create Subjects
+    // Create Subjects (4 subjects only - no social studies)
     console.log('📖 Creating subjects...');
     const subjects = await Subject.insertMany([
-      { code: 'MATH', name: 'رياضيات' },
       { code: 'ARABIC', name: 'لغة عربية' },
       { code: 'ENGLISH', name: 'لغة إنجليزية' },
+      { code: 'MATH', name: 'رياضيات' },
       { code: 'SCIENCE', name: 'علوم' },
-      { code: 'SOCIAL', name: 'دراسات اجتماعية' },
     ]);
     console.log(`✅ Created ${subjects.length} subjects`);
 
