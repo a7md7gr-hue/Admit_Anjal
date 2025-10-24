@@ -211,6 +211,55 @@ export default function SuperAdminDashboard() {
     }
   }
 
+  async function handleAddSchool(name: string, code: string) {
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/super-admin/schools", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, shortCode: code }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(`✅ تمت إضافة المدرسة: ${name}`);
+        loadReferenceLists(); // Refresh list
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        setMessage(`❌ ${data.error || "فشلت الإضافة"}`);
+      }
+    } catch (error: any) {
+      setMessage(`❌ ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteSchool(schoolId: string, schoolName: string) {
+    if (!confirm(`⚠️ هل أنت متأكد من حذف المدرسة: ${schoolName}؟\nهذا الإجراء لا يمكن التراجع عنه!`)) {
+      return;
+    }
+    setLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch(`/api/super-admin/schools?id=${schoolId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMessage(`✅ تم حذف المدرسة: ${schoolName}`);
+        loadReferenceLists(); // Refresh list
+        setTimeout(() => setMessage(""), 3000);
+      } else {
+        setMessage(`❌ ${data.error || "فشل الحذف"}`);
+      }
+    } catch (error: any) {
+      setMessage(`❌ ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
@@ -772,25 +821,60 @@ export default function SuperAdminDashboard() {
             {/* Schools Tab */}
             {activeTab === "schools" && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  المدارس المسجلة
-                </h2>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    المدارس المسجلة ({lists.schools.length})
+                  </h2>
+                  <button
+                    onClick={() => {
+                      const schoolName = prompt('أدخل اسم المدرسة:');
+                      const schoolCode = prompt('أدخل رمز المدرسة (مثل: ANB):');
+                      if (schoolName && schoolCode) {
+                        handleAddSchool(schoolName, schoolCode);
+                      }
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-md flex items-center gap-2"
+                  >
+                    <span>➕</span>
+                    <span>إضافة مدرسة</span>
+                  </button>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {lists.schools.map((school: any) => (
                     <div
                       key={school.id}
-                      className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
+                      className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow group"
                     >
-                      <h3 className="text-xl font-bold text-gray-900 mb-2">
-                        {school.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        الرمز: {school.shortCode}
-                      </p>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">
+                            {school.name}
+                          </h3>
+                          <p className="text-sm font-mono text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block">
+                            الرمز: {school.code}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteSchool(school.id, school.name)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-100 text-red-600 px-3 py-2 rounded-lg hover:bg-red-200 text-sm font-semibold"
+                          title="حذف المدرسة"
+                        >
+                          🗑️ حذف
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {lists.schools.length === 0 && (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <p className="text-gray-500 text-lg">لا توجد مدارس مسجلة</p>
+                    <p className="text-gray-400 text-sm mt-2">
+                      اضغط على "إضافة مدرسة" لإضافة مدرسة جديدة
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

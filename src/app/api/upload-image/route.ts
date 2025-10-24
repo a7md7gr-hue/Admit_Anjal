@@ -34,21 +34,30 @@ export async function POST(request: Request) {
     const extension = file.name.split('.').pop();
     const filename = `question_${timestamp}_${randomStr}.${extension}`;
 
-    // Create questions directory if it doesn't exist
-    const questionsDir = join(process.cwd(), 'public', 'questions');
-    if (!existsSync(questionsDir)) {
-      await mkdir(questionsDir, { recursive: true });
-    }
+    // --- IMPORTANT: Vercel Serverless File System ---
+    // In Vercel serverless environment, only /tmp directory is writable.
+    // The public directory is read-only after deployment.
+    // For PERSISTENT image storage, you should use:
+    // - Vercel Blob Storage (recommended)
+    // - AWS S3 / Cloudinary / etc.
+    //
+    // Current workaround: Save to /tmp (temporary, not persistent across requests)
+    // Files in /tmp are deleted after function execution.
+    
+    const questionsDir = join('/tmp', 'questions');
+    await mkdir(questionsDir, { recursive: true });
 
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Write file
+    // Write file to /tmp
     const filepath = join(questionsDir, filename);
     await writeFile(filepath, buffer);
 
-    // Return public URL
+    // Return simulated public URL
+    // Note: This URL won't actually serve the file from /tmp
+    // In production, you'd return the URL from your cloud storage
     const imageUrl = `/questions/${filename}`;
 
     return NextResponse.json({
