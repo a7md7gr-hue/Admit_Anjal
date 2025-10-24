@@ -193,8 +193,8 @@ export async function parseExcelToQuestions(file: File): Promise<any[]> {
   const rows = XLSX.utils.sheet_to_json(sheet);
 
   console.log('📊 Excel parsed:', rows.length, 'rows');
-  if (rows.length > 0) {
-    console.log('First row keys:', Object.keys(rows[0]));
+  if (rows.length > 0 && rows[0]) {
+    console.log('First row keys:', Object.keys(rows[0] as Record<string, unknown>));
   }
 
   return rows.map((row: any, index: number) => {

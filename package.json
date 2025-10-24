@@ -12,15 +12,11 @@
     "seed:full": "npx tsx scripts/seed-full.ts"
   },
   "dependencies": {
-    "@prisma/client": "^6.17.1",
-    "@supabase/auth-helpers-nextjs": "^0.10.0",
-    "@supabase/supabase-js": "^2.75.1",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
     "jose": "^6.1.0",
     "mongoose": "^8.19.2",
     "next": "15.5.6",
-    "prisma": "^6.17.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "xlsx": "^0.18.5",
