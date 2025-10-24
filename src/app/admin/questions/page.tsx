@@ -7,6 +7,7 @@ export default function AddQuestionPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [lists, setLists] = useState<any>({
     subjects: [],
     programs: [],
@@ -269,22 +270,60 @@ export default function AddQuestionPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  صورة السؤال (رابط)
+                  صورة السؤال (اختياري)
                 </label>
                 <input
-                  type="text"
+                  type="file"
+                  accept="image/*"
+                  disabled={uploadingImage}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={questionForm.imageUrl}
-                  onChange={(e) =>
-                    setQuestionForm({
-                      ...questionForm,
-                      imageUrl: e.target.value,
-                    })
-                  }
-                  placeholder="https://example.com/image.png"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+
+                    setUploadingImage(true);
+                    try {
+                      const formData = new FormData();
+                      formData.append('image', file);
+
+                      const res = await fetch('/api/upload-image', {
+                        method: 'POST',
+                        body: formData,
+                      });
+
+                      const data = await res.json();
+                      if (data.success) {
+                        setQuestionForm({
+                          ...questionForm,
+                          imageUrl: data.imageUrl,
+                        });
+                        setMessage('✅ تم رفع الصورة بنجاح!');
+                        setTimeout(() => setMessage(''), 3000);
+                      } else {
+                        setMessage('❌ فشل رفع الصورة: ' + data.error);
+                      }
+                    } catch (error: any) {
+                      setMessage('❌ خطأ: ' + error.message);
+                    } finally {
+                      setUploadingImage(false);
+                    }
+                  }}
                 />
-                {questionForm.imageUrl && (
-                  <div className="mt-2">
+                {uploadingImage && (
+                  <p className="text-sm text-blue-600 mt-2">⏳ جاري رفع الصورة...</p>
+                )}
+                {questionForm.imageUrl && !uploadingImage && (
+                  <div className="mt-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm text-green-600">✅ تم رفع الصورة</span>
+                      <button
+                        type="button"
+                        onClick={() => setQuestionForm({ ...questionForm, imageUrl: '' })}
+                        className="text-xs text-red-600 hover:text-red-800"
+                      >
+                        حذف
+                      </button>
+                    </div>
                     <img
                       src={questionForm.imageUrl}
                       alt="Question Preview"
