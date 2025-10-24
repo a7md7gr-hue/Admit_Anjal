@@ -149,7 +149,7 @@ export async function GET(request: Request) {
     const managers = [];
     for (let i = 0; i < 6; i++) {
       const manager = await User.create({
-        nationalId: `222222000${i}`,
+        nationalId: `222222${String(i).padStart(4, '0')}`,
         password: 'Test@1234',
         fullName: `مدير ${i + 1}`,
         email: `manager${i}@anjal.edu.sa`,
@@ -166,7 +166,7 @@ export async function GET(request: Request) {
     const teachers = [];
     for (let i = 0; i < 10; i++) {
       const teacher = await User.create({
-        nationalId: `444444000${i}`,
+        nationalId: `444444${String(i).padStart(4, '0')}`,
         password: 'Test@1234',
         fullName: `معلم ${i + 1}`,
         email: `teacher${i}@anjal.edu.sa`,
@@ -186,8 +186,8 @@ export async function GET(request: Request) {
 
     for (let i = 0; i < 15; i++) {
       const student = await User.create({
-        nationalId: `555555000${i}`,
-        password: `100${i}`,
+        nationalId: `555555${String(i).padStart(4, '0')}`,
+        password: `${1000 + i}`,
         fullName: `طالب ${i + 1}`,
         email: `student${i}@anjal.edu.sa`,
         phone: `+96655555000${i}`,
