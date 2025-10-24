@@ -25,6 +25,17 @@ export async function POST(request: Request) {
     // Parse Excel
     const students = await parseExcelToStudents(file);
 
+    console.log('📊 Parsed students from Excel:', students.length);
+    if (students.length > 0) {
+      console.log('First student:', students[0]);
+    }
+
+    if (students.length === 0) {
+      return NextResponse.json({ 
+        error: "الملف فارغ أو بصيغة غير صحيحة. تأكد من وجود الأعمدة: FullName, NationalID, School, Program, Grade, PIN, Phone1" 
+      }, { status: 400 });
+    }
+
     await connectDB();
 
     const studentRole = await Role.findOne({ code: "STUDENT" });
@@ -53,8 +64,16 @@ export async function POST(request: Request) {
         const program = await Program.findOne({ name: s.program });
         const grade = await Grade.findOne({ name: s.grade });
 
-        if (!school || !program || !grade) {
-          errors.push(`${s.fullName}: بيانات مرجعية غير صحيحة`);
+        if (!school) {
+          errors.push(`${s.fullName}: المدرسة "${s.school}" غير موجودة في القاعدة`);
+          continue;
+        }
+        if (!program) {
+          errors.push(`${s.fullName}: البرنامج "${s.program}" غير موجود في القاعدة`);
+          continue;
+        }
+        if (!grade) {
+          errors.push(`${s.fullName}: الصف "${s.grade}" غير موجود في القاعدة`);
           continue;
         }
 

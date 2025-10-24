@@ -25,6 +25,23 @@ export async function POST(request: Request) {
     // Parse Excel
     const questions = await parseExcelToQuestions(file);
 
+    console.log('📊 Parsed questions from Excel:', questions.length);
+    if (questions.length > 0) {
+      console.log('First question:', {
+        text: questions[0].questionText.substring(0, 50),
+        type: questions[0].questionType,
+        subject: questions[0].subject,
+        program: questions[0].program,
+        grade: questions[0].grade,
+      });
+    }
+
+    if (questions.length === 0) {
+      return NextResponse.json({ 
+        error: "الملف فارغ أو بصيغة غير صحيحة. تأكد من وجود الأعمدة: QuestionText, Type, Points, Subject, Program, Grade" 
+      }, { status: 400 });
+    }
+
     await connectDB();
 
     let created = 0;
@@ -37,10 +54,16 @@ export async function POST(request: Request) {
         const program = await Program.findOne({ name: q.program });
         const grade = await Grade.findOne({ name: q.grade });
 
-        if (!subject || !program || !grade) {
-          errors.push(
-            `السؤال "${q.questionText.substring(0, 30)}...": بيانات مرجعية غير صحيحة`,
-          );
+        if (!subject) {
+          errors.push(`السؤال "${q.questionText.substring(0, 30)}...": المادة "${q.subject}" غير موجودة`);
+          continue;
+        }
+        if (!program) {
+          errors.push(`السؤال "${q.questionText.substring(0, 30)}...": البرنامج "${q.program}" غير موجود`);
+          continue;
+        }
+        if (!grade) {
+          errors.push(`السؤال "${q.questionText.substring(0, 30)}...": الصف "${q.grade}" غير موجود`);
           continue;
         }
 
