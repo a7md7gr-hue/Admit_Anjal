@@ -33,3 +33,4 @@ SchoolGradeSchema.index({ schoolId: 1, gradeId: 1 }, { unique: true });
 export default mongoose.models.SchoolGrade ||
   mongoose.model<ISchoolGrade>("SchoolGrade", SchoolGradeSchema);
 
+

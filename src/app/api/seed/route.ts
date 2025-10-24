@@ -118,19 +118,6 @@ export async function GET(request: Request) {
       throw new Error('Required roles not found');
     }
 
-    // Create Owner
-    console.log('👑 Creating owner...');
-    const owner = await User.create({
-      nationalId: '0000000000',
-      password: 'Owner@2025!Ahmed',
-      fullName: 'أحمد حجر',
-      email: 'ahmed.hagr@anjal.edu.sa',
-      phone: '+966500000000',
-      roleId: ownerRole._id,
-      isActive: true,
-    });
-    console.log('✅ Owner created');
-
     // Create Super Admin
     console.log('👨‍💼 Creating super admin...');
     const superAdmin = await User.create({
@@ -196,7 +183,7 @@ export async function GET(request: Request) {
       });
 
       const schoolIndex = i % schools.length;
-      const pin4 = `100${i}`;
+      const pin4 = `${1000 + i}`;
 
       await StudentProfile.create({
         userId: student._id,
@@ -215,18 +202,17 @@ export async function GET(request: Request) {
     // Create Questions
     console.log('❓ Creating questions...');
     const mathSubject = subjects.find(s => s.code === 'MATH');
-    const easyCategory = categories.find(c => c.code === 'EASY');
 
     const questions = [];
     for (let i = 0; i < 30; i++) {
       const question = await Question.create({
-        questionText: `سؤال رياضيات ${i + 1}`,
+        questionText: `سؤال رياضيات ${i + 1}: كم يساوي ${i + 1} + ${i + 1}؟`,
         questionType: 'mcq',
         subjectId: mathSubject!._id,
-        categoryId: easyCategory!._id,
-        marks: 2,
-        correctAnswer: 'A',
-        isActive: true,
+        programId: arabicProgram!._id,
+        gradeId: sixthGrade!._id,
+        points: 2,
+        isApproved: true,
       });
       questions.push(question);
     }
@@ -283,7 +269,6 @@ export async function GET(request: Request) {
         subjects: subjects.length,
         categories: categories.length,
         users: {
-          owner: 1,
           superAdmin: 1,
           managers: managers.length,
           teachers: teachers.length,
@@ -293,7 +278,6 @@ export async function GET(request: Request) {
         exams: exams.length,
       },
       credentials: {
-        owner: { nationalId: '0000000000', password: 'Owner@2025!Ahmed' },
         superAdmin: { nationalId: '1111111111', password: 'Test@1234' },
         manager1: { nationalId: '2222220000', password: 'Test@1234' },
         teacher1: { nationalId: '4444440000', password: 'Test@1234' },
