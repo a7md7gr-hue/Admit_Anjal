@@ -29,6 +29,14 @@ export default function ProfilePage() {
       const res = await fetch('/api/auth/me');
       if (res.ok) {
         const data = await res.json();
+        
+        // Students can't access profile page - they use PIN only
+        if (data.user.role === 'STUDENT') {
+          alert('⛔ الطلاب لا يمكنهم الوصول لإعدادات الحساب');
+          router.push('/student/exam');
+          return;
+        }
+        
         setUser(data.user);
         setProfile(data.profile);
         setFormData({

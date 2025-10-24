@@ -1392,6 +1392,118 @@ export default function SuperAdminDashboard() {
                   🗄️ إدارة قاعدة البيانات
                 </h2>
 
+                {/* Change User Role Section */}
+                <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-300 rounded-2xl p-8 mb-8">
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="text-5xl">🔄</div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-blue-700 mb-2">
+                        تغيير دور مستخدم
+                      </h3>
+                      <p className="text-blue-600">
+                        قم بتغيير دور أي مستخدم في النظام (ما عدا Owner)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl p-6">
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const formData = new FormData(e.currentTarget);
+                        const nationalId = formData.get('changeRoleNationalId') as string;
+                        const newRole = formData.get('newRole') as string;
+
+                        if (!nationalId || !newRole) {
+                          setMessage('❌ رقم الهوية والدور الجديد مطلوبان');
+                          return;
+                        }
+
+                        setLoading(true);
+                        setMessage('');
+
+                        try {
+                          const res = await fetch('/api/super-admin/change-user-role', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ nationalId, newRole }),
+                          });
+
+                          const data = await res.json();
+
+                          if (res.ok) {
+                            setMessage(data.message);
+                            loadUsers();
+                            (e.target as HTMLFormElement).reset();
+                          } else {
+                            setMessage(`❌ ${data.error}`);
+                          }
+                        } catch (error: any) {
+                          setMessage(`❌ ${error.message || 'حدث خطأ'}`);
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            رقم الهوية الوطنية (10 أرقام)
+                          </label>
+                          <input
+                            type="text"
+                            name="changeRoleNationalId"
+                            required
+                            maxLength={10}
+                            pattern="[0-9]{10}"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="مثال: 2185255896"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            الدور الجديد
+                          </label>
+                          <select
+                            name="newRole"
+                            required
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="">-- اختر الدور --</option>
+                            <option value="SUPER_ADMIN">مدير نظام</option>
+                            <option value="MANAGER">مدير مدرسة</option>
+                            <option value="SUPERVISOR">مشرف</option>
+                            <option value="TEACHER">معلم</option>
+                            <option value="STUDENT">طالب</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? 'جاري التغيير...' : '🔄 تغيير الدور'}
+                      </button>
+
+                      {message && (
+                        <div
+                          className={`p-4 rounded-lg text-center ${
+                            message.includes('✅')
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {message}
+                        </div>
+                      )}
+                    </form>
+                  </div>
+                </div>
+
                 <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
                   <div className="flex items-center gap-4 mb-6">
                     <div className="text-6xl">⚠️</div>

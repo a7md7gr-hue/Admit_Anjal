@@ -16,7 +16,7 @@ const ROLE_PATHS: Record<string, string[]> = {
   SUPER_ADMIN: ["/super-admin", "/admin", "/manager", "/teacher", "/profile"],
   MANAGER: ["/manager", "/admin", "/profile"],
   TEACHER: ["/teacher", "/profile"],
-  STUDENT: ["/student", "/profile"],
+  STUDENT: ["/student"], // Students don't have access to /profile - they use PIN only
   SUPERVISOR: ["/supervisor", "/profile"],
 };
 
