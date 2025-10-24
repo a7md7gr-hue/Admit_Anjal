@@ -15,13 +15,15 @@ export default function SetupPage() {
     setResult(null);
 
     try {
-      const response = await fetch('/api/seed');
+      const response = await fetch('/api/init-admin', {
+        method: 'POST',
+      });
       const data = await response.json();
 
       if (data.success) {
         setResult(data);
       } else {
-        setError(data.error || 'فشل ملء قاعدة البيانات');
+        setError(data.error || 'فشل إنشاء Super Admin');
       }
     } catch (err: any) {
       setError(err.message || 'حدث خطأ');
@@ -69,7 +71,7 @@ export default function SetupPage() {
         </h1>
 
         <p className="text-white/80 text-center mb-8">
-          اضغط على الزر أدناه لملء قاعدة البيانات بالبيانات الأولية
+          اضغط على الزر أدناه لإنشاء حساب Super Admin
         </p>
 
         <div className="space-y-4">
@@ -84,11 +86,11 @@ export default function SetupPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
-                جاري الملء...
-              </span>
-            ) : (
-              '🚀 ابدأ الإعداد'
-            )}
+              جاري الإنشاء...
+            </span>
+          ) : (
+            '🚀 إنشاء Super Admin'
+          )}
           </button>
 
           <button
@@ -134,30 +136,34 @@ export default function SetupPage() {
             <p className="text-green-200 font-bold text-xl mb-4">✅ تم بنجاح!</p>
 
             <div className="space-y-3 text-white">
-              <p className="font-semibold">📊 تم إضافة:</p>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li>{result.summary?.users?.superAdmin || 1} Super Admin</li>
-                <li>{result.summary?.users?.managers || 6} Managers</li>
-                <li>{result.summary?.users?.teachers || 10} Teachers</li>
-                <li>{result.summary?.users?.students || 15} Students</li>
-                <li>{result.summary?.exams || 3} Exams</li>
-                <li>{result.summary?.questions || 30} Questions</li>
-              </ul>
+              <p className="font-semibold text-center mb-4">✅ {result.message}</p>
 
-              <div className="mt-6 pt-6 border-t border-white/20">
-                <p className="font-semibold mb-3">🔐 بيانات تسجيل الدخول:</p>
-
-                <div className="bg-white/10 rounded-lg p-4 mb-3">
-                  <p className="text-green-300 font-semibold mb-2">👨‍💼 Super Admin:</p>
-                  <p className="text-sm">الرقم الوطني: <span className="font-mono bg-black/30 px-2 py-1 rounded">1111111111</span></p>
-                  <p className="text-sm">كلمة المرور: <span className="font-mono bg-black/30 px-2 py-1 rounded">Test@1234</span></p>
+              <div className="bg-white/10 rounded-lg p-6">
+                <p className="text-green-300 font-semibold mb-4 text-center">👨‍💼 Super Admin</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">الاسم:</span>
+                    <span className="font-semibold">{result.superAdmin?.fullName}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">الرقم الوطني:</span>
+                    <span className="font-mono bg-black/30 px-3 py-1 rounded text-green-300">
+                      {result.superAdmin?.nationalId}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm">كلمة المرور:</span>
+                    <span className="font-mono bg-black/30 px-3 py-1 rounded text-green-300">
+                      {result.superAdmin?.password}
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                <div className="bg-white/10 rounded-lg p-4">
-                  <p className="text-blue-300 font-semibold mb-2">👨‍🎓 طالب:</p>
-                  <p className="text-sm">الرقم الوطني: <span className="font-mono bg-black/30 px-2 py-1 rounded">5555550000</span></p>
-                  <p className="text-sm">الرمز: <span className="font-mono bg-black/30 px-2 py-1 rounded">1000</span></p>
-                </div>
+              <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-4 mt-4">
+                <p className="text-yellow-200 text-sm">
+                  💡 <strong>ملاحظة:</strong> الآن يمكنك إضافة المدارس، البرامج، المواد، المعلمين والطلاب من لوحة Super Admin
+                </p>
               </div>
 
               <div className="mt-6 text-center">

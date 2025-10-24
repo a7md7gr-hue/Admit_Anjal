@@ -18,7 +18,19 @@ export async function POST() {
   try {
     await connectDB();
 
-    console.log('🗑️ Starting database cleanup...');
+    console.log('🗑️ Starting database cleanup (keeping Owner & Super Admin)...');
+
+    // Get Owner and Super Admin role IDs BEFORE deleting anything
+    const ownerRole = await Role.findOne({ code: 'OWNER' });
+    const superAdminRole = await Role.findOne({ code: 'SUPER_ADMIN' });
+    
+    const protectedRoleIds = [ownerRole?._id, superAdminRole?._id].filter(Boolean);
+    console.log('🛡️ Protected roles:', protectedRoleIds.length);
+
+    // Get Owner and Super Admin users BEFORE deleting
+    const protectedUsers = await User.find({ roleId: { $in: protectedRoleIds } }).select('_id nationalId fullName');
+    const protectedUserIds = protectedUsers.map(u => u._id);
+    console.log('🛡️ Protected users:', protectedUsers.map(u => `${u.fullName} (${u.nationalId})`));
 
     // Delete in correct order (respect foreign keys)
     await AttemptAnswer.deleteMany({});
@@ -54,17 +66,22 @@ export async function POST() {
     await StudentProfile.deleteMany({});
     console.log('✅ Deleted StudentProfiles');
 
-    await User.deleteMany({});
-    console.log('✅ Deleted Users');
+    // Delete only non-protected users
+    const deletedUsers = await User.deleteMany({ _id: { $nin: protectedUserIds } });
+    console.log(`✅ Deleted ${deletedUsers.deletedCount} Users (kept ${protectedUserIds.length} protected)`);
 
-    await Role.deleteMany({});
-    console.log('✅ Deleted Roles');
+    // Don't delete any roles - keep all roles intact
+    console.log('🛡️ Kept all Roles intact');
 
     console.log('🎉 Database cleared successfully!');
 
     return NextResponse.json({
       success: true,
-      message: 'تم مسح قاعدة البيانات بنجاح! يمكنك الآن البدء من الصفر.',
+      message: 'تم مسح قاعدة البيانات بنجاح! (تم الاحتفاظ بحسابات Owner و Super Admin)',
+      protected: {
+        users: protectedUsers.map(u => ({ fullName: u.fullName, nationalId: u.nationalId })),
+        count: protectedUserIds.length,
+      },
       deletedCollections: [
         'AttemptAnswers',
         'Attempts',
@@ -77,8 +94,7 @@ export async function POST() {
         'Programs',
         'Schools',
         'StudentProfiles',
-        'Users',
-        'Roles',
+        `Users (${deletedUsers.deletedCount} deleted, ${protectedUserIds.length} protected)`,
       ],
     });
   } catch (error: any) {

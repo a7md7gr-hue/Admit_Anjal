@@ -192,36 +192,55 @@ export async function parseExcelToQuestions(file: File): Promise<any[]> {
   const sheet = workbook.Sheets[sheetName];
   const rows = XLSX.utils.sheet_to_json(sheet);
 
-  return rows.map((row: any) => {
+  console.log('📊 Excel parsed:', rows.length, 'rows');
+  if (rows.length > 0) {
+    console.log('First row keys:', Object.keys(rows[0]));
+  }
+
+  return rows.map((row: any, index: number) => {
     const options: any[] = [];
 
     // Parse options for MCQ/True-False
-    const type = (row.Type || row["النوع"] || "").toLowerCase();
-    if (type === "mcq") {
+    const type = (row.Type || row.type || row["النوع"] || row.QuestionType || row.questionType || "").toLowerCase();
+    
+    if (type === "mcq" || type === "اختيار من متعدد") {
       for (let i = 1; i <= 6; i++) {
-        const optKey = `Option${i}` || `خيار${i}`;
-        if (row[optKey]) {
+        const optKey = `Option${i}`;
+        const optKeyAr = `خيار${i}`;
+        const optValue = row[optKey] || row[optKeyAr] || row[`option${i}`];
+        
+        if (optValue) {
+          const correctAns = String(row.CorrectAnswer || row.correctAnswer || row["الإجابة الصحيحة"] || "");
           options.push({
-            text: row[optKey],
-            isCorrect:
-              String(row.CorrectAnswer || row["الإجابة الصحيحة"]) === String(i),
+            text: optValue,
+            isCorrect: correctAns === String(i) || correctAns.toLowerCase() === optValue.toLowerCase(),
           });
         }
       }
-    } else if (type === "true_false") {
-      options.push({ text: "صح", isCorrect: row.CorrectAnswer === "صح" });
-      options.push({ text: "خطأ", isCorrect: row.CorrectAnswer === "خطأ" });
+    } else if (type === "true_false" || type === "صح وخطأ") {
+      const correctAns = row.CorrectAnswer || row.correctAnswer || row["الإجابة الصحيحة"];
+      options.push({ text: "صح", isCorrect: correctAns === "صح" || correctAns === "True" || correctAns === "true" });
+      options.push({ text: "خطأ", isCorrect: correctAns === "خطأ" || correctAns === "False" || correctAns === "false" });
     }
 
-    return {
-      questionText: row.QuestionText || row["نص السؤال"] || "",
-      questionType: type,
-      points: Number(row.Points || row["النقاط"] || 1),
-      subject: row.Subject || row["المادة"] || "",
-      program: row.Program || row["البرنامج"] || "",
-      grade: row.Grade || row["الصف"] || "",
-      imageUrl: row.ImageUrl || row["رابط الصورة"] || "",
+    const question = {
+      questionText: row.QuestionText || row.questionText || row.Question || row.question || row["نص السؤال"] || row["السؤال"] || "",
+      questionType: type === "اختيار من متعدد" ? "mcq" : type === "صح وخطأ" ? "true_false" : type === "مقالي" ? "essay" : type === "شفوي" ? "oral" : type,
+      points: Number(row.Points || row.points || row["النقاط"] || row.Marks || row.marks || 1),
+      subject: row.Subject || row.subject || row["المادة"] || "",
+      program: row.Program || row.program || row["البرنامج"] || "",
+      grade: row.Grade || row.grade || row["الصف"] || "",
+      imageUrl: row.ImageUrl || row.imageUrl || row["رابط الصورة"] || "",
       options,
     };
+
+    console.log(`Row ${index + 1}:`, {
+      questionText: question.questionText.substring(0, 30),
+      type: question.questionType,
+      subject: question.subject,
+      optionsCount: options.length
+    });
+
+    return question;
   });
 }
