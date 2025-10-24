@@ -35,6 +35,8 @@ export default function SuperAdminDashboard() {
   const [students, setStudents] = useState<any[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [reports, setReports] = useState<any>(null);
+  const [userSearchTerm, setUserSearchTerm] = useState("");
+  const [studentSearchTerm, setStudentSearchTerm] = useState("");
 
   const [lists, setLists] = useState<any>({
     schools: [],
@@ -49,6 +51,31 @@ export default function SuperAdminDashboard() {
     loadReferenceLists();
     fetchUserName();
   }, []);
+
+  // Filter users based on search term
+  const filteredUsers = users.filter((user) => {
+    if (!userSearchTerm) return true;
+    const searchLower = userSearchTerm.toLowerCase();
+    return (
+      user.fullName?.toLowerCase().includes(searchLower) ||
+      user.nationalId?.includes(searchLower) ||
+      user.email?.toLowerCase().includes(searchLower) ||
+      user.role?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Filter students based on search term
+  const filteredStudents = students.filter((student) => {
+    if (!studentSearchTerm) return true;
+    const searchLower = studentSearchTerm.toLowerCase();
+    return (
+      student.fullName?.toLowerCase().includes(searchLower) ||
+      student.nationalId?.includes(searchLower) ||
+      student.pin4?.includes(searchLower) ||
+      student.school?.toLowerCase().includes(searchLower) ||
+      student.grade?.toLowerCase().includes(searchLower)
+    );
+  });
 
   useEffect(() => {
     if (activeTab === "users") {
@@ -640,11 +667,22 @@ export default function SuperAdminDashboard() {
 
                 {/* Users List */}
                 <div className="mt-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    قائمة المستخدمين
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      قائمة المستخدمين ({filteredUsers.length})
+                    </h2>
+                    <div className="w-96">
+                      <input
+                        type="text"
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        placeholder="🔍 ابحث بالاسم، الهوية، البريد، أو الدور..."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
 
-                  {users.length > 0 ? (
+                  {filteredUsers.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow">
                         <thead className="bg-gray-100">
@@ -667,7 +705,7 @@ export default function SuperAdminDashboard() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {users.map((user: any) => (
+                          {filteredUsers.map((user: any) => (
                             <tr key={user.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 text-sm text-gray-900">
                                 {user.fullName}
@@ -957,11 +995,22 @@ export default function SuperAdminDashboard() {
 
                 {/* Students List */}
                 <div className="mt-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    قائمة الطلاب
-                  </h2>
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      قائمة الطلاب ({filteredStudents.length})
+                    </h2>
+                    <div className="w-96">
+                      <input
+                        type="text"
+                        value={studentSearchTerm}
+                        onChange={(e) => setStudentSearchTerm(e.target.value)}
+                        placeholder="🔍 ابحث بالاسم، الهوية، المدرسة، الصف، أو PIN..."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
 
-                  {students.length > 0 ? (
+                  {filteredStudents.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow">
                         <thead className="bg-gray-100">
@@ -987,7 +1036,7 @@ export default function SuperAdminDashboard() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                          {students.map((student: any) => (
+                          {filteredStudents.map((student: any) => (
                             <tr key={student.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 text-sm text-gray-900">
                                 {student.fullName}

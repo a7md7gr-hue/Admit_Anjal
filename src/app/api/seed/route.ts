@@ -136,15 +136,25 @@ export async function GET(request: Request) {
     });
     console.log('✅ Super admin created');
 
-    // Create Managers
+    // Create Managers - واحد لكل مدرسة
     console.log('👔 Creating managers...');
     const managers = [];
     const hashedManagerPassword = await bcrypt.hash('Test@1234', 10);
-    for (let i = 0; i < 6; i++) {
+    
+    const managerData = [
+      { name: 'أحمد محمد - مدير', school: 'ANB', fullName: 'أحمد محمد (مدير - الأهلية بنين)' },
+      { name: 'فاطمة أحمد - مديرة', school: 'ANG', fullName: 'فاطمة أحمد (مديرة - الأهلية بنات)' },
+      { name: 'خالد سالم - مدير', school: 'AIB', fullName: 'خالد سالم (مدير - الدولية بنين)' },
+      { name: 'نورة عبدالله - مديرة', school: 'AIG', fullName: 'نورة عبدالله (مديرة - الدولية بنات)' },
+      { name: 'سعد الغامدي - مدير', school: 'AKAC', fullName: 'سعد الغامدي (مدير - مدينة الملك عبدالله)' },
+      { name: 'ريم القحطاني - مديرة', school: 'ARC', fullName: 'ريم القحطاني (مديرة - مدينة الرياض)' },
+    ];
+    
+    for (let i = 0; i < managerData.length; i++) {
       const manager = await User.create({
         nationalId: `222222${String(i).padStart(4, '0')}`,
         password: hashedManagerPassword,
-        fullName: `مدير ${i + 1}`,
+        fullName: managerData[i].fullName,
         email: `manager${i}@anjal.edu.sa`,
         phone: `+96652222000${i}`,
         roleId: managerRole._id,
@@ -154,15 +164,25 @@ export async function GET(request: Request) {
     }
     console.log(`✅ Created ${managers.length} managers`);
 
-    // Create Teachers
+    // Create Teachers - معلم واحد لكل مادة
     console.log('👨‍🏫 Creating teachers...');
     const teachers = [];
     const hashedTeacherPassword = await bcrypt.hash('Test@1234', 10);
-    for (let i = 0; i < 10; i++) {
+    
+    const teacherData = [
+      { name: 'محمد العمري', subject: 'عربي', school: 'ANB', program: 'عربي', grades: 'G3-G6', fullName: 'محمد العمري (عربي - الأهلية بنين - G3-G6)' },
+      { name: 'سارة أحمد', subject: 'إنجليزي', school: 'ANG', program: 'عربي', grades: 'G3-G6', fullName: 'سارة أحمد (إنجليزي - الأهلية بنات - G3-G6)' },
+      { name: 'عبدالله حسن', subject: 'رياضيات', school: 'AIB', program: 'دولي', grades: 'G7-G9', fullName: 'عبدالله حسن (رياضيات - الدولية بنين - G7-G9)' },
+      { name: 'منى خالد', subject: 'علوم', school: 'AIG', program: 'دولي', grades: 'G7-G9', fullName: 'منى خالد (علوم - الدولية بنات - G7-G9)' },
+      { name: 'يوسف الدوسري', subject: 'عربي', school: 'AKAC', program: 'عربي', grades: 'G10-G12', fullName: 'يوسف الدوسري (عربي - الملك عبدالله - G10-G12)' },
+      { name: 'هند المطيري', subject: 'إنجليزي', school: 'ARC', program: 'عربي', grades: 'G10-G12', fullName: 'هند المطيري (إنجليزي - الرياض - G10-G12)' },
+    ];
+    
+    for (let i = 0; i < teacherData.length; i++) {
       const teacher = await User.create({
         nationalId: `444444${String(i).padStart(4, '0')}`,
         password: hashedTeacherPassword,
-        fullName: `معلم ${i + 1}`,
+        fullName: teacherData[i].fullName,
         email: `teacher${i}@anjal.edu.sa`,
         phone: `+96654444000${i}`,
         roleId: teacherRole._id,
@@ -172,34 +192,62 @@ export async function GET(request: Request) {
     }
     console.log(`✅ Created ${teachers.length} teachers`);
 
-    // Create Students
+    // Create Students - طالبين من كل مدرسة وصف
     console.log('👨‍🎓 Creating students...');
     const students = [];
     const arabicProgram = programs.find(p => p.code === 'ARABIC');
-    const sixthGrade = grades.find(g => g.code === 'G6');
+    const internationalProgram = programs.find(p => p.code === 'INTERNATIONAL');
+    
+    const studentData = [
+      // الأهلية بنين - عربي
+      { name: 'أحمد سعيد', school: 'ANB', program: 'ARABIC', grade: 'G3', pin: '1001' },
+      { name: 'خالد محمد', school: 'ANB', program: 'ARABIC', grade: 'G6', pin: '1002' },
+      
+      // الأهلية بنات - عربي
+      { name: 'فاطمة أحمد', school: 'ANG', program: 'ARABIC', grade: 'G4', pin: '1003' },
+      { name: 'نورة سالم', school: 'ANG', program: 'ARABIC', grade: 'G5', pin: '1004' },
+      
+      // الدولية بنين - دولي
+      { name: 'عبدالله عمر', school: 'AIB', program: 'INTERNATIONAL', grade: 'G7', pin: '1005' },
+      { name: 'سعد يوسف', school: 'AIB', program: 'INTERNATIONAL', grade: 'G8', pin: '1006' },
+      
+      // الدولية بنات - دولي
+      { name: 'سارة علي', school: 'AIG', program: 'INTERNATIONAL', grade: 'G9', pin: '1007' },
+      { name: 'منى حسن', school: 'AIG', program: 'INTERNATIONAL', grade: 'G10', pin: '1008' },
+      
+      // مدينة الملك عبدالله - عربي
+      { name: 'يوسف إبراهيم', school: 'AKAC', program: 'ARABIC', grade: 'G11', pin: '1009' },
+      { name: 'عمر خالد', school: 'AKAC', program: 'ARABIC', grade: 'G12', pin: '1010' },
+      
+      // مدينة الرياض - عربي
+      { name: 'ريم عبدالله', school: 'ARC', program: 'ARABIC', grade: 'G3', pin: '1011' },
+      { name: 'هند محمد', school: 'ARC', program: 'ARABIC', grade: 'G6', pin: '1012' },
+    ];
 
-    for (let i = 0; i < 15; i++) {
-      const pin = `${1000 + i}`;
-      const hashedStudentPassword = await bcrypt.hash(pin, 10);
+    for (let i = 0; i < studentData.length; i++) {
+      const data = studentData[i];
+      const hashedStudentPassword = await bcrypt.hash(data.pin, 10);
+      
+      const school = schools.find(s => s.shortCode === data.school);
+      const program = programs.find(p => p.code === data.program);
+      const grade = grades.find(g => g.code === data.grade);
+      
       const student = await User.create({
         nationalId: `555555${String(i).padStart(4, '0')}`,
         password: hashedStudentPassword,
-        fullName: `طالب ${i + 1}`,
+        fullName: `${data.name} (${grade?.name} - ${school?.name})`,
         email: `student${i}@anjal.edu.sa`,
         phone: `+96655555000${i}`,
         roleId: studentRole._id,
         isActive: true,
       });
 
-      const schoolIndex = i % schools.length;
-      const pin4 = `${1000 + i}`;
-
       await StudentProfile.create({
         userId: student._id,
-        schoolId: schools[schoolIndex]._id,
-        programId: arabicProgram!._id,
-        gradeId: sixthGrade!._id,
-        pin4,
+        schoolId: school!._id,
+        programId: program!._id,
+        gradeId: grade!._id,
+        pin4: data.pin,
         phone1: `+96650${1000000 + i}`,
         phone2: `+96655${1000000 + i}`,
       });
@@ -211,6 +259,7 @@ export async function GET(request: Request) {
     // Create Questions
     console.log('❓ Creating questions...');
     const mathSubject = subjects.find(s => s.code === 'MATH');
+    const sixthGrade = grades.find(g => g.code === 'G6');
 
     const questions = [];
     for (let i = 0; i < 30; i++) {
@@ -275,10 +324,41 @@ export async function GET(request: Request) {
         exams: exams.length,
       },
       credentials: {
-        superAdmin: { nationalId: '1111111111', password: 'Test@1234' },
-        manager1: { nationalId: '2222220000', password: 'Test@1234' },
-        teacher1: { nationalId: '4444440000', password: 'Test@1234' },
-        student1: { nationalId: '5555550000', pin: '1000' },
+        superAdmin: { 
+          nationalId: '1111111111', 
+          password: 'Test@1234',
+          email: 'admin@anjal.edu.sa' 
+        },
+        managers: [
+          { nationalId: '2222220000', password: 'Test@1234', name: 'أحمد محمد (الأهلية بنين)' },
+          { nationalId: '2222220001', password: 'Test@1234', name: 'فاطمة أحمد (الأهلية بنات)' },
+          { nationalId: '2222220002', password: 'Test@1234', name: 'خالد سالم (الدولية بنين)' },
+          { nationalId: '2222220003', password: 'Test@1234', name: 'نورة عبدالله (الدولية بنات)' },
+          { nationalId: '2222220004', password: 'Test@1234', name: 'سعد الغامدي (الملك عبدالله)' },
+          { nationalId: '2222220005', password: 'Test@1234', name: 'ريم القحطاني (الرياض)' },
+        ],
+        teachers: [
+          { nationalId: '4444440000', password: 'Test@1234', name: 'محمد العمري (عربي - الأهلية بنين - G3-G6)' },
+          { nationalId: '4444440001', password: 'Test@1234', name: 'سارة أحمد (إنجليزي - الأهلية بنات - G3-G6)' },
+          { nationalId: '4444440002', password: 'Test@1234', name: 'عبدالله حسن (رياضيات - الدولية بنين - G7-G9)' },
+          { nationalId: '4444440003', password: 'Test@1234', name: 'منى خالد (علوم - الدولية بنات - G7-G9)' },
+          { nationalId: '4444440004', password: 'Test@1234', name: 'يوسف الدوسري (عربي - الملك عبدالله - G10-G12)' },
+          { nationalId: '4444440005', password: 'Test@1234', name: 'هند المطيري (إنجليزي - الرياض - G10-G12)' },
+        ],
+        students: [
+          { nationalId: '5555550000', pin: '1001', name: 'أحمد سعيد (G3 - الأهلية بنين)' },
+          { nationalId: '5555550001', pin: '1002', name: 'خالد محمد (G6 - الأهلية بنين)' },
+          { nationalId: '5555550002', pin: '1003', name: 'فاطمة أحمد (G4 - الأهلية بنات)' },
+          { nationalId: '5555550003', pin: '1004', name: 'نورة سالم (G5 - الأهلية بنات)' },
+          { nationalId: '5555550004', pin: '1005', name: 'عبدالله عمر (G7 - الدولية بنين)' },
+          { nationalId: '5555550005', pin: '1006', name: 'سعد يوسف (G8 - الدولية بنين)' },
+          { nationalId: '5555550006', pin: '1007', name: 'سارة علي (G9 - الدولية بنات)' },
+          { nationalId: '5555550007', pin: '1008', name: 'منى حسن (G10 - الدولية بنات)' },
+          { nationalId: '5555550008', pin: '1009', name: 'يوسف إبراهيم (G11 - الملك عبدالله)' },
+          { nationalId: '5555550009', pin: '1010', name: 'عمر خالد (G12 - الملك عبدالله)' },
+          { nationalId: '5555550010', pin: '1011', name: 'ريم عبدالله (G3 - الرياض)' },
+          { nationalId: '5555550011', pin: '1012', name: 'هند محمد (G6 - الرياض)' },
+        ],
       },
     });
   } catch (error: any) {
