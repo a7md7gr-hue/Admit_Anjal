@@ -114,16 +114,21 @@ export default function SuperAdminDashboard() {
   });
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+    
+    console.log(`📍 Active tab changed to: ${activeTab}`);
+    
     if (activeTab === "users") {
       loadUsers();
     } else if (activeTab === "students") {
       loadStudents();
     } else if (activeTab === "questions") {
+      console.log("🔄 Loading questions for questions tab...");
       loadQuestions();
     } else if (activeTab === "reports") {
       loadReports();
     }
-  }, [activeTab]);
+  }, [activeTab, isAuthenticated]);
 
   async function handleEmptyDatabase() {
     if (!emptyConfirm) {
@@ -239,14 +244,24 @@ export default function SuperAdminDashboard() {
   }
 
   async function loadQuestions() {
+    setLoading(true);
     try {
+      console.log("📊 Loading questions...");
       const res = await fetch("/api/super-admin/questions/list");
+      console.log("📊 Response status:", res.status);
+      
       if (res.ok) {
         const data = await res.json();
+        console.log("📊 Questions data:", data);
+        console.log("📊 Questions count:", data.questions?.length || 0);
         setQuestions(data.questions || []);
+      } else {
+        console.error("❌ Failed to load questions:", res.status);
       }
     } catch (error) {
-      console.error("Error loading questions:", error);
+      console.error("❌ Error loading questions:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -712,11 +727,14 @@ export default function SuperAdminDashboard() {
                       <div className="text-yellow-100">المحاولات</div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg">
+                    <div 
+                      onClick={() => router.push("/super-admin/tracking")}
+                      className="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl p-6 shadow-lg cursor-pointer hover:from-red-600 hover:to-red-700 transition-all transform hover:scale-105"
+                    >
                       <div className="text-4xl font-bold mb-2">
                         {stats.pendingGrading || 0}
                       </div>
-                      <div className="text-red-100">قيد التصحيح</div>
+                      <div className="text-red-100">قيد التصحيح 👆</div>
                     </div>
                   </div>
                 ) : (
