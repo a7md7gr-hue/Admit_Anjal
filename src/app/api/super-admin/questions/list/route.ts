@@ -41,24 +41,48 @@ export async function GET(request: Request) {
     // Parse limit parameter (default: 1000, max: 1000)
     const limit = limitParam ? Math.min(parseInt(limitParam), 1000) : 1000;
 
-    // Get questions with populated fields
+    // Get questions WITHOUT populate first to ensure we get results
     const questions = await Question.find(query)
-      .populate("subjectId")
-      .populate("programId")
-      .populate("gradeId")
-      .populate("categoryId")
       .sort({ createdAt: -1 })
-      .limit(limit);
+      .limit(limit)
+      .lean();
 
     console.log(`📊 Found ${questions.length} questions in database`);
 
+    if (questions.length === 0) {
+      console.log("⚠️ No questions found! Query:", JSON.stringify(query));
+      return NextResponse.json({ 
+        questions: [],
+        total: 0,
+        filtered: 0,
+        debug: { query, message: "No questions in database" }
+      });
+    }
+
+    // Now populate names separately
     const questionList = [];
     for (const q of questions) {
       try {
-        const subject = q.subjectId as any;
-        const program = q.programId as any;
-        const grade = q.gradeId as any;
-        const category = q.categoryId as any;
+        let subjectName = "-";
+        let programName = "-";
+        let gradeName = "-";
+        let categoryName = "-";
+
+        // Safely get related data
+        if (q.subjectId) {
+          const subject = await Subject.findById(q.subjectId).lean();
+          subjectName = subject?.name || "-";
+        }
+        
+        if (q.programId) {
+          const program = await Program.findById(q.programId).lean();
+          programName = program?.name || "-";
+        }
+        
+        if (q.gradeId) {
+          const grade = await Grade.findById(q.gradeId).lean();
+          gradeName = grade?.name || "-";
+        }
 
         // Get options count if MCQ
         let optionsCount = 0;
@@ -72,10 +96,10 @@ export async function GET(request: Request) {
           id: q._id.toString(),
           questionText: q.questionText,
           questionType: q.questionType,
-          subject: subject?.name || "-",
-          program: program?.name || "-",
-          grade: grade?.name || "-",
-          category: category?.name || "-",
+          subject: subjectName,
+          program: programName,
+          grade: gradeName,
+          category: categoryName,
           points: q.points || 1,
           optionsCount,
           isApproved: q.isApproved,
@@ -83,7 +107,20 @@ export async function GET(request: Request) {
         });
       } catch (err) {
         console.error(`❌ Error processing question ${q._id}:`, err);
-        // Skip this question and continue
+        // Still add the question even if populate failed
+        questionList.push({
+          id: (q._id as any).toString(),
+          questionText: q.questionText || "N/A",
+          questionType: q.questionType || "unknown",
+          subject: "-",
+          program: "-",
+          grade: "-",
+          category: "-",
+          points: q.points || 1,
+          optionsCount: 0,
+          isApproved: q.isApproved || false,
+          createdAt: q.createdAt,
+        });
       }
     }
 
