@@ -9,8 +9,11 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [userName, setUserName] = useState("");
+  const [userRole, setUserRole] = useState(""); // To track user role (OWNER vs SUPER_ADMIN)
   const [clearing, setClearing] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [emptying, setEmptying] = useState(false);
+  const [emptyConfirm, setEmptyConfirm] = useState(false);
   const router = useRouter();
 
   // Form states
@@ -89,6 +92,44 @@ export default function SuperAdminDashboard() {
     }
   }, [activeTab]);
 
+  async function handleEmptyDatabase() {
+    if (!emptyConfirm) {
+      setEmptyConfirm(true);
+      setTimeout(() => setEmptyConfirm(false), 5000);
+      return;
+    }
+
+    if (!confirm("⚠️ تحذير: سيتم تفريغ قاعدة البيانات من البيانات الديناميكية!\n\nسيتم حذف: الطلاب، المعلمين، الأسئلة، الاختبارات، المحاولات\n\nهل أنت متأكد؟")) {
+      setEmptyConfirm(false);
+      return;
+    }
+
+    setEmptying(true);
+    setMessage("");
+
+    try {
+      const response = await fetch('/api/empty-database', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage("✅ " + data.message);
+        setTimeout(() => {
+          setMessage("");
+          loadStats();
+        }, 3000);
+      } else {
+        setMessage("❌ خطأ: " + data.error);
+      }
+    } catch (err: any) {
+      setMessage("❌ خطأ: " + err.message);
+    } finally {
+      setEmptying(false);
+      setEmptyConfirm(false);
+    }
+  }
+
   async function handleClearDatabase() {
     if (!clearConfirm) {
       setClearConfirm(true);
@@ -133,6 +174,7 @@ export default function SuperAdminDashboard() {
       if (res.ok) {
         const data = await res.json();
         setUserName(data.fullName || "");
+        setUserRole(data.role || ""); // Get user role (OWNER, SUPER_ADMIN, etc.)
       }
     } catch (error) {
       console.error("Error fetching user name:", error);
@@ -501,13 +543,21 @@ export default function SuperAdminDashboard() {
                 </h2>
 
                 {/* Quick Actions */}
-                <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <button
                     onClick={() => router.push("/super-admin/exams")}
                     className="bg-gradient-to-r from-purple-600 to-pink-700 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-pink-800 transition-all shadow-lg flex items-center justify-center gap-3"
                   >
                     <span className="text-2xl">📝</span>
                     <span>إدارة الامتحانات</span>
+                  </button>
+
+                  <button
+                    onClick={() => router.push("/super-admin/schools")}
+                    className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-orange-700 hover:to-red-700 transition-all shadow-lg flex items-center justify-center gap-3"
+                  >
+                    <span className="text-2xl">🏫</span>
+                    <span>إدارة المدارس</span>
                   </button>
 
                   <button
@@ -1596,15 +1646,16 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
+                {/* Empty Database - For SUPER_ADMIN */}
+                <div className="bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-2xl p-8 mb-8">
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="text-6xl">⚠️</div>
+                    <div className="text-6xl">🗑️</div>
                     <div>
-                      <h3 className="text-2xl font-bold text-red-700 mb-2">
-                        منطقة خطرة!
+                      <h3 className="text-2xl font-bold text-orange-700 mb-2">
+                        تفريغ قاعدة البيانات
                       </h3>
-                      <p className="text-red-600">
-                        هذا الإجراء سيحذف جميع البيانات من قاعدة البيانات نهائياً
+                      <p className="text-orange-600">
+                        حذف البيانات الديناميكية مع الاحتفاظ بالإعدادات الأساسية
                       </p>
                     </div>
                   </div>
@@ -1614,19 +1665,25 @@ export default function SuperAdminDashboard() {
                       سيتم حذف:
                     </h4>
                     <ul className="grid grid-cols-2 gap-2 text-gray-700">
-                      <li>✓ جميع المستخدمين</li>
+                      <li>✓ جميع المستخدمين (ما عدا المدراء)</li>
                       <li>✓ جميع الطلاب</li>
                       <li>✓ جميع الأسئلة</li>
                       <li>✓ جميع الاختبارات</li>
                       <li>✓ جميع المحاولات</li>
                       <li>✓ جميع النتائج</li>
-                      <li>✓ جميع المواد</li>
-                      <li>✓ جميع البرامج</li>
-                      <li>✓ جميع الصفوف</li>
-                      <li>✓ جميع المدارس</li>
-                      <li>✓ جميع الأدوار</li>
-                      <li>✓ كل شيء!</li>
                     </ul>
+                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <h4 className="font-bold text-green-800 mb-2">
+                        سيتم الاحتفاظ بـ:
+                      </h4>
+                      <ul className="text-green-700 text-sm space-y-1">
+                        <li>✓ المدارس</li>
+                        <li>✓ البرامج (عربي/دولي)</li>
+                        <li>✓ الصفوف</li>
+                        <li>✓ المواد</li>
+                        <li>✓ الأدوار</li>
+                      </ul>
+                    </div>
                   </div>
 
                   {message && (
@@ -1640,52 +1697,119 @@ export default function SuperAdminDashboard() {
                   )}
 
                   <button
-                    onClick={handleClearDatabase}
-                    disabled={clearing}
+                    onClick={handleEmptyDatabase}
+                    disabled={emptying}
                     className={`w-full font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                      clearConfirm
-                        ? 'bg-gradient-to-r from-red-700 to-red-900 hover:from-red-800 hover:to-red-950 animate-pulse text-white'
-                        : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white'
+                      emptyConfirm
+                        ? 'bg-gradient-to-r from-orange-700 to-red-700 hover:from-orange-800 hover:to-red-800 animate-pulse text-white'
+                        : 'bg-gradient-to-r from-orange-600 to-yellow-600 hover:from-orange-700 hover:to-yellow-700 text-white'
                     }`}
                   >
-                    {clearing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        جاري مسح قاعدة البيانات...
-                      </span>
-                    ) : clearConfirm ? (
-                      <span className="text-lg">
-                        🚨 اضغط مرة ثانية للتأكيد النهائي - سيتم مسح كل شيء نهائياً!
-                      </span>
-                    ) : (
-                      <span className="text-lg">
-                        🗑️ مسح قاعدة البيانات بالكامل
-                      </span>
-                    )}
+                    {emptying ? 'جاري التفريغ...' : emptyConfirm ? '🚨 اضغط مرة ثانية للتأكيد!' : '🗑️ تفريغ قاعدة البيانات'}
                   </button>
 
-                  {clearConfirm && (
+                  {emptyConfirm && (
                     <div className="mt-4 text-center">
-                      <p className="text-red-700 font-bold text-lg animate-pulse">
+                      <p className="text-orange-700 font-bold text-lg animate-pulse">
                         ⏰ لديك 5 ثوانٍ للتأكيد!
-                      </p>
-                      <p className="text-red-600 text-sm mt-2">
-                        سيتم إلغاء التأكيد تلقائياً بعد 5 ثوانٍ
                       </p>
                     </div>
                   )}
-
-                  <div className="mt-6 text-center text-gray-600 text-sm">
-                    💡 بعد المسح، يمكنك الذهاب إلى{" "}
-                    <a href="/setup" className="text-blue-600 hover:underline font-semibold">
-                      /setup
-                    </a>{" "}
-                    لإعادة ملء قاعدة البيانات
-                  </div>
                 </div>
+
+                {/* Clear Database - For OWNER ONLY */}
+                {userRole === 'OWNER' && (
+                  <div className="bg-gradient-to-br from-red-50 to-pink-50 border-2 border-red-300 rounded-2xl p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="text-6xl">⚠️</div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-red-700 mb-2">
+                          منطقة خطرة جداً! (للمسؤولين فقط)
+                        </h3>
+                        <p className="text-red-600">
+                          هذا الإجراء سيحذف جميع البيانات من قاعدة البيانات نهائياً
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-6 mb-6">
+                      <h4 className="font-bold text-gray-800 mb-3">
+                        سيتم حذف كل شيء:
+                      </h4>
+                      <ul className="grid grid-cols-2 gap-2 text-gray-700">
+                        <li>✓ جميع المستخدمين</li>
+                        <li>✓ جميع الطلاب</li>
+                        <li>✓ جميع الأسئلة</li>
+                        <li>✓ جميع الاختبارات</li>
+                        <li>✓ جميع المحاولات</li>
+                        <li>✓ جميع النتائج</li>
+                        <li>✓ جميع المواد</li>
+                        <li>✓ جميع البرامج</li>
+                        <li>✓ جميع الصفوف</li>
+                        <li>✓ جميع المدارس</li>
+                        <li>✓ جميع الأدوار</li>
+                        <li>✓ كل شيء!</li>
+                      </ul>
+                    </div>
+
+                    {message && (
+                      <div className={`p-4 rounded-lg mb-4 ${
+                        message.includes("✅") 
+                          ? "bg-green-100 text-green-700" 
+                          : "bg-red-100 text-red-700"
+                      }`}>
+                        {message}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleClearDatabase}
+                      disabled={clearing}
+                      className={`w-full font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        clearConfirm
+                          ? 'bg-gradient-to-r from-red-700 to-red-900 hover:from-red-800 hover:to-red-950 animate-pulse text-white'
+                          : 'bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white'
+                      }`}
+                    >
+                      {clearing ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          جاري مسح قاعدة البيانات...
+                        </span>
+                      ) : clearConfirm ? (
+                        <span className="text-lg">
+                          🚨 اضغط مرة ثانية للتأكيد النهائي - سيتم مسح كل شيء نهائياً!
+                        </span>
+                      ) : (
+                        <span className="text-lg">
+                          ⚠️ مسح كامل - منطقة خطرة!
+                        </span>
+                      )}
+                    </button>
+
+                    {clearConfirm && (
+                      <div className="mt-4 text-center">
+                        <p className="text-red-700 font-bold text-lg animate-pulse">
+                          ⏰ لديك 5 ثوانٍ للتأكيد!
+                        </p>
+                        <p className="text-red-600 text-sm mt-2">
+                          بمجرد الضغط مرة أخرى، لن تتمكن من استعادة البيانات!
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-6 text-center text-gray-600 text-sm">
+                      💡 بعد المسح، يمكنك الذهاب إلى{" "}
+                      <a href="/setup" className="text-blue-600 hover:underline font-semibold">
+                        /setup
+                      </a>{" "}
+                      لإعادة ملء قاعدة البيانات
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

