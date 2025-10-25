@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // Create Roles
     console.log('📋 Creating roles...');
     const roles = await Role.insertMany([
-      { code: 'OWNER', name: 'Owner' },
+      { code: 'OWNER', name: 'System Admin' }, // Hidden admin role
       { code: 'SUPER_ADMIN', name: 'Super Admin' },
       { code: 'MANAGER', name: 'Manager' },
       { code: 'SUPERVISOR', name: 'Supervisor' },

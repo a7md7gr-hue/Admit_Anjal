@@ -20,32 +20,32 @@ import SupervisorAssignment from '@/models/SupervisorAssignment';
 import SubjectWeight from '@/models/SubjectWeight';
 
 /**
- * مسح كامل لقاعدة البيانات (للـ Owner فقط!)
- * يمسح كل شيء ماعدا Owner و Super Admin
+ * مسح كامل لقاعدة البيانات (مستوى عالي فقط!)
+ * يمسح كل شيء ماعدا حسابات الإدارة
  */
 export async function POST() {
   try {
     const authUser = await getAuthUser();
     
-    // Only Owner can clear EVERYTHING
-    if (!authUser || authUser.role.toUpperCase() !== 'OWNER') {
+    // Only high-level admins can clear EVERYTHING
+    if (!authUser || !['OWNER', 'SUPER_ADMIN'].includes(authUser.role.toUpperCase())) {
       return NextResponse.json({ 
-        error: 'غير مصرح لك! هذا الإجراء للـ Owner فقط.' 
+        error: 'غير مصرح لك! هذا الإجراء للمسؤولين فقط.' 
       }, { status: 403 });
     }
 
     await connectDB();
 
-    console.log('🗑️ Starting FULL database cleanup (Owner only)...');
+    console.log('🗑️ Starting FULL database cleanup...');
 
-    // Get Owner and Super Admin role IDs BEFORE deleting anything
+    // Get admin role IDs BEFORE deleting anything
     const ownerRole = await Role.findOne({ code: 'OWNER' });
     const superAdminRole = await Role.findOne({ code: 'SUPER_ADMIN' });
     
     const protectedRoleIds = [ownerRole?._id, superAdminRole?._id].filter(Boolean);
     console.log('🛡️ Protected roles:', protectedRoleIds.length);
 
-    // Get Owner and Super Admin users BEFORE deleting
+    // Get admin users BEFORE deleting
     const protectedUsers = await User.find({ roleId: { $in: protectedRoleIds } }).select('_id nationalId fullName');
     const protectedUserIds = protectedUsers.map(u => u._id);
     console.log('🛡️ Protected users:', protectedUsers.map(u => `${u.fullName} (${u.nationalId})`));
