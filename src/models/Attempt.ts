@@ -16,6 +16,8 @@ export interface IAttempt extends Document {
 
   // Supervisor approval status
   supervisorApprovalComplete?: boolean;
+  supervisorApproved?: boolean; // Used by supervisor approval API
+  supervisorNotes?: string; // Supervisor notes
   allSubjectsApproved?: boolean;
 
   // Manager final approval
@@ -67,6 +69,13 @@ const AttemptSchema = new Schema<IAttempt>(
     supervisorApprovalComplete: {
       type: Boolean,
       default: false,
+    },
+    supervisorApproved: {
+      type: Boolean,
+      default: false,
+    },
+    supervisorNotes: {
+      type: String,
     },
     allSubjectsApproved: {
       type: Boolean,
