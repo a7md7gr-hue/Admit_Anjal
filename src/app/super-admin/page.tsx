@@ -577,10 +577,18 @@ export default function SuperAdminDashboard() {
                   </button>
 
                   <button
+                    onClick={() => router.push("/super-admin/bulk-questions")}
+                    className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 rounded-xl font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow-lg flex items-center justify-center gap-3"
+                  >
+                    <span className="text-2xl">📝</span>
+                    <span>إضافة أسئلة متعددة</span>
+                  </button>
+
+                  <button
                     onClick={() => router.push("/super-admin/upload-questions")}
                     className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-4 rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg flex items-center justify-center gap-3"
                   >
-                    <span className="text-2xl">📝</span>
+                    <span className="text-2xl">📤</span>
                     <span>رفع الأسئلة (Excel)</span>
                   </button>
                 </div>
@@ -1217,7 +1225,7 @@ export default function SuperAdminDashboard() {
               <div>
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    بنك الأسئلة
+                    بنك الأسئلة ({questions.length})
                   </h2>
                   <div className="flex gap-3">
                     <button
@@ -1226,6 +1234,13 @@ export default function SuperAdminDashboard() {
                     >
                       <span>➕</span>
                       <span>إضافة سؤال</span>
+                    </button>
+                    <button
+                      onClick={() => router.push("/super-admin/bulk-questions")}
+                      className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md flex items-center gap-2"
+                    >
+                      <span>📝</span>
+                      <span>إضافة أسئلة متعددة</span>
                     </button>
                     <button
                       onClick={() =>
