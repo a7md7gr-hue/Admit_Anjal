@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const subjectFilter = searchParams.get("subject");
     const typeFilter = searchParams.get("type");
+    const limitParam = searchParams.get("limit");
 
     let query: any = {};
 
@@ -37,6 +38,9 @@ export async function GET(request: Request) {
       query.questionType = typeFilter;
     }
 
+    // Parse limit parameter (default: 1000, max: 1000)
+    const limit = limitParam ? Math.min(parseInt(limitParam), 1000) : 1000;
+
     // Get questions with populated fields
     const questions = await Question.find(query)
       .populate("subjectId")
@@ -44,39 +48,52 @@ export async function GET(request: Request) {
       .populate("gradeId")
       .populate("categoryId")
       .sort({ createdAt: -1 })
-      .limit(100); // Limit to last 100 questions
+      .limit(limit);
+
+    console.log(`📊 Found ${questions.length} questions in database`);
 
     const questionList = [];
     for (const q of questions) {
-      const subject = q.subjectId as any;
-      const program = q.programId as any;
-      const grade = q.gradeId as any;
-      const category = q.categoryId as any;
+      try {
+        const subject = q.subjectId as any;
+        const program = q.programId as any;
+        const grade = q.gradeId as any;
+        const category = q.categoryId as any;
 
-      // Get options count if MCQ
-      let optionsCount = 0;
-      if (q.questionType === "mcq" || q.questionType === "true_false") {
-        optionsCount = await QuestionOption.countDocuments({
-          questionId: q._id,
+        // Get options count if MCQ
+        let optionsCount = 0;
+        if (q.questionType === "mcq" || q.questionType === "true_false") {
+          optionsCount = await QuestionOption.countDocuments({
+            questionId: q._id,
+          });
+        }
+
+        questionList.push({
+          id: q._id.toString(),
+          questionText: q.questionText,
+          questionType: q.questionType,
+          subject: subject?.name || "-",
+          program: program?.name || "-",
+          grade: grade?.name || "-",
+          category: category?.name || "-",
+          points: q.points || 1,
+          optionsCount,
+          isApproved: q.isApproved,
+          createdAt: q.createdAt,
         });
+      } catch (err) {
+        console.error(`❌ Error processing question ${q._id}:`, err);
+        // Skip this question and continue
       }
-
-      questionList.push({
-        id: q._id.toString(),
-        questionText: q.questionText,
-        questionType: q.questionType,
-        subject: subject?.name || "-",
-        program: program?.name || "-",
-        grade: grade?.name || "-",
-        category: category?.name || "-",
-        points: q.points || 1,
-        optionsCount,
-        isApproved: q.isApproved,
-        createdAt: q.createdAt,
-      });
     }
 
-    return NextResponse.json({ questions: questionList });
+    console.log(`✅ Returning ${questionList.length} questions to client`);
+
+    return NextResponse.json({ 
+      questions: questionList,
+      total: questions.length,
+      filtered: questionList.length
+    });
   } catch (error: any) {
     console.error("Error fetching questions:", error);
     return NextResponse.json(

@@ -23,10 +23,13 @@ const ROLE_PATHS: Record<string, string[]> = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  console.log(`🛡️ Middleware triggered for: ${pathname}`);
+
   // Allow public paths
   if (
     PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(path))
   ) {
+    console.log(`✅ Public path allowed: ${pathname}`);
     return NextResponse.next();
   }
 
@@ -36,6 +39,7 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {
+    console.log(`✅ Static/API path allowed: ${pathname}`);
     return NextResponse.next();
   }
 
@@ -54,8 +58,11 @@ export async function middleware(request: NextRequest) {
   );
 
   if (!isProtectedPath) {
+    console.log(`⚠️ Not a protected path: ${pathname}`);
     return NextResponse.next();
   }
+
+  console.log(`🔒 Protected path detected: ${pathname}`);
 
   // Check for authentication
   const staffToken = request.cookies.get("staff_token")?.value;
@@ -114,5 +121,15 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)).*)",
+  ],
 };

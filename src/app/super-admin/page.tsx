@@ -14,6 +14,8 @@ export default function SuperAdminDashboard() {
   const [clearConfirm, setClearConfirm] = useState(false);
   const [emptying, setEmptying] = useState(false);
   const [emptyConfirm, setEmptyConfirm] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const router = useRouter();
 
   // Form states
@@ -49,11 +51,42 @@ export default function SuperAdminDashboard() {
     categories: [],
   });
 
+  // Auth check on mount
   useEffect(() => {
-    loadStats();
-    loadReferenceLists();
-    fetchUserName();
-  }, []);
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (!res.ok) {
+          // Not authenticated
+          console.log("❌ Not authenticated, redirecting to login");
+          router.push("/auth/staff");
+          return;
+        }
+        const data = await res.json();
+        const role = data.role?.toUpperCase() || data.user?.role?.toUpperCase();
+        
+        if (!role || !["SUPER_ADMIN", "OWNER"].includes(role)) {
+          console.log("❌ Insufficient permissions, redirecting");
+          router.push("/auth/staff");
+          return;
+        }
+        
+        console.log("✅ Authenticated as:", role);
+        setIsAuthenticated(true);
+        setAuthLoading(false);
+        
+        // Load data only after auth confirmed
+        loadStats();
+        loadReferenceLists();
+        fetchUserName();
+      } catch (error) {
+        console.error("Auth check error:", error);
+        router.push("/auth/staff");
+      }
+    }
+    
+    checkAuth();
+  }, [router]);
 
   // Filter users based on search term
   const filteredUsers = users.filter((user) => {
@@ -235,6 +268,17 @@ export default function SuperAdminDashboard() {
       if (res.ok) {
         const data = await res.json();
         setStats(data);
+        
+        // Also update lists if available in stats
+        if (data.schools || data.programs || data.grades || data.subjects) {
+          setLists({
+            schools: data.schools || [],
+            programs: data.programs || [],
+            grades: data.grades || [],
+            subjects: data.subjects || [],
+            categories: lists.categories || [],
+          });
+        }
       }
     } catch (error) {
       console.error("Error loading stats:", error);
@@ -470,6 +514,30 @@ export default function SuperAdminDashboard() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Show loading screen while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+        <div className="text-center">
+          <div className="inline-block animate-spin h-16 w-16 border-4 border-white border-t-transparent rounded-full mb-4"></div>
+          <p className="text-white text-xl font-semibold">🔐 جاري التحقق من الصلاحيات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Only render if authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-500 to-pink-600">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🚫</div>
+          <p className="text-white text-xl font-semibold">غير مصرح... جاري التحويل</p>
+        </div>
+      </div>
+    );
   }
 
   return (
